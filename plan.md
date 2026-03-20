@@ -255,3 +255,15 @@ USING (bucket_id = 'food-images');
 -- 5. 데이터 최종 확인
 SELECT * FROM food_items ORDER BY id ASC;
 ```
+
+주소
+
+/ : 메인 주소(shopping 페이지)
+
+/Dashboard : 대시보드 관련
+
+/Armed-Reserve : 예비군 관련
+
+/Recruitment : 병 모집 관련
+
+/Community : 커뮤니티 관련
