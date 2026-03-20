@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { NavLink } from 'react-router-dom';
 import { LoginModal } from '../common/LoginModal';
 
 export const Header: React.FC = () => {
@@ -34,19 +35,26 @@ export const Header: React.FC = () => {
           Modern Sentinel
         </div>
         <div className="hidden md:flex items-center space-x-8">
-          <a
-            className="text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-300 transition-colors font-['Inter'] text-sm tracking-tight"
-            href="#"
+          <NavLink
+            to="/"
+            className={({ isActive }) =>
+              isActive
+                ? "text-blue-700 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400 pb-1 font-['Inter'] text-sm tracking-tight"
+                : "text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-300 transition-colors font-['Inter'] text-sm tracking-tight"
+            }
           >
             Shopping
-            
-          </a>
-          <a
-            className="text-blue-700 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400 pb-1 font-['Inter'] text-sm tracking-tight"
-            href="#"
+          </NavLink>
+          <NavLink
+            to="/Dashboard"
+            className={({ isActive }) =>
+              isActive
+                ? "text-blue-700 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400 pb-1 font-['Inter'] text-sm tracking-tight"
+                : "text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-300 transition-colors font-['Inter'] text-sm tracking-tight"
+            }
           >
             Dashboard
-          </a>
+          </NavLink>
           <a
             className="text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-300 transition-colors font-['Inter'] text-sm tracking-tight"
             href="#"
