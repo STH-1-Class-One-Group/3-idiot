@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { LoginModal } from '../common/LoginModal';
+import { CartIcon } from '../../features/cart/components/CartIcon';
 
 export const Header: React.FC = () => {
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
@@ -91,11 +92,8 @@ export const Header: React.FC = () => {
           >
             confirmation_number
           </span>
-          <span
-            className="material-symbols-outlined text-slate-500 dark:text-slate-400 cursor-pointer hover:text-blue-600 transition-all"
-          >
-            shopping_cart
-          </span>
+          {/* 장바구니 아이콘 — CartIcon이 openCart + 배지를 모두 담당 */}
+          <CartIcon />
           <button
             onClick={() => setIsLoginModalOpen(true)}
             className="flex items-center justify-center p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
