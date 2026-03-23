@@ -10,8 +10,9 @@ export const DashboardPage: React.FC = () => {
             당신의 군 생활을 위한<br/>
             <span className="text-primary dark:text-blue-400">통합 지휘 본부.</span>
           </h1>
-          <p className="text-on-surface-variant dark:text-slate-400 text-lg leading-relaxed max-w-xl">
-            효율적인 일정 관리와 최신 국방 정보, 맞춤형 서비스를 한곳에서 제어하십시오. 현대적이고 직관적인 센티넬 대시보드입니다.
+          <p className="text-on-surface-variant dark:text-slate-400 text-lg leading-relaxed max-w-3xl flex flex-col">
+            <span>효율적인 일정 관리와 최신 국방 정보, 맞춤형 서비스를 한곳에서 제어하십시오.</span> 
+            <span>현대적이고 직관적인 센티넬 대시보드입니다.</span>
           </p>
         </div>
         {/* Decorative Element */}
