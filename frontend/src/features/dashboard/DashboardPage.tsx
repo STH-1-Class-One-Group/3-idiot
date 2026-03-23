@@ -1,6 +1,81 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+
+interface MealData {
+  dates: string;
+  brst?: string;
+  brst_cal?: string;
+  lunc?: string;
+  lnch?: string;
+  lunc_cal?: string;
+  lnch_cal?: string;
+  dinr?: string;
+  dnr?: string;
+  dinr_cal?: string;
+  dnr_cal?: string;
+  sum_cal?: string;
+}
+
+const fallbackData: MealData[] = [
+   {"dates":"2024-09-01(일)","brst":"밥","brst_cal":"374.13kcal","lunc":"밥","lunc_cal":"374.13kcal","dinr":"밥","dinr_cal":"374.13kcal","sum_cal":"2961.19kcal"},
+   {"dates":"2024-09-01(일)","brst":"참치 고추장찌개(05)(06)(09)(16)","brst_cal":"148.73kcal","lunc":"황태채미역국(05)(06)(16)","lunc_cal":"41.88kcal","dinr":"닭볶음탕(05)(15)","dinr_cal":"451.14kcal","sum_cal":"2961.19kcal"},
+   {"dates":"2024-09-01(일)","brst":"새송이버섯야채볶음(05)(06)(10)(18)","brst_cal":"111.5kcal","lunc":"사천식캐슈넛멸치볶음(04)(05)","lunc_cal":"102.06kcal","dinr":"사골우거지국(02)(05)(06)(16)(18)","dinr_cal":"164.58kcal","sum_cal":"2961.19kcal"},
+   {"dates":"2024-09-01(일)","brst":"계란말이(완)(01)(05)(12)","brst_cal":"106kcal","lunc":"고추장돼지불고기(완제품)(05)(10)","lunc_cal":"482.33kcal","dinr":"느타리버섯볶음(05)","dinr_cal":"37.98kcal","sum_cal":"2961.19kcal"},
+   {"dates":"2024-09-01(일)","brst":"배추김치(수의계약)","brst_cal":"13.8kcal","lunc":"배추김치(수의계약)","lunc_cal":"13.8kcal","dinr":"토핑형발효유(02)(06)","dinr_cal":"165kcal","sum_cal":"2961.19kcal"},
+   {"dates":"2024-09-01(일)","brst":"","brst_cal":"","lunc":"","lunc_cal":"","dinr":"배추김치","dinr_cal":"0kcal","sum_cal":"2961.19kcal"}
+];
+
+const getTodayString = () => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  const days = ['일', '월', '화', '수', '목', '금', '토'];
+  const dayName = days[today.getDay()];
+  return `${year}-${month}-${day}(${dayName})`;
+};
 
 export const DashboardPage: React.FC = () => {
+  const [mealInfo, setMealInfo] = useState({ breakfast: '불러오는 중...', lunch: '불러오는 중...', dinner: '불러오는 중...' });
+
+  useEffect(() => {
+    const fetchMeals = async () => {
+      try {
+        // Attempt to fetch from Cloudflare KV Workers
+        const response = await fetch('https://meals.7aae3335fb024377b2868d2b7833b765.workers.dev');
+        if (!response.ok) {
+          throw new Error('Failed to fetch');
+        }
+        const data = await response.json();
+        
+        const todayStr = getTodayString();
+        let todayData = (data.DATA || data).filter((item: MealData) => item.dates === todayStr);
+        
+        if (!todayData || todayData.length === 0) {
+          throw new Error('No data for today');
+        }
+        processMealData(todayData);
+      } catch (error) {
+        const todayStr = getTodayString();
+        const fallbackMapped = fallbackData.map(item => ({ ...item, dates: todayStr }));
+        processMealData(fallbackMapped);
+      }
+    };
+
+    const processMealData = (data: MealData[]) => {
+      const breakfastItems = data.map(item => item.brst).filter(item => item && item.trim() !== '');
+      const lunchItems = data.map(item => item.lunc || item.lnch).filter(item => item && item.trim() !== '');
+      const dinnerItems = data.map(item => item.dinr || item.dnr).filter(item => item && item.trim() !== '');
+      
+      setMealInfo({
+        breakfast: breakfastItems.length > 0 ? breakfastItems.join(', ') : '메뉴 없음',
+        lunch: lunchItems.length > 0 ? lunchItems.join(', ') : '메뉴 없음',
+        dinner: dinnerItems.length > 0 ? dinnerItems.join(', ') : '메뉴 없음'
+      });
+    };
+
+    fetchMeals();
+  }, []);
+
   return (
     <div className="space-y-16 w-full">
       {/* Hero Section */}
@@ -93,7 +168,7 @@ export const DashboardPage: React.FC = () => {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <span className="text-xs font-bold text-primary dark:text-blue-400 w-8">조식</span>
-                <p className="text-sm text-on-surface dark:text-slate-200">쌀밥, 미역국, 제육볶음, 김치</p>
+                <p className="text-sm text-on-surface dark:text-slate-200 break-all">{mealInfo.breakfast}</p>
               </div>
               <button className="text-on-surface-variant dark:text-slate-400 hover:text-primary dark:hover:text-blue-400 transition-colors flex">
                 <span className="material-symbols-outlined text-lg" translate="no">chevron_right</span>
@@ -102,7 +177,7 @@ export const DashboardPage: React.FC = () => {
             <div className="flex items-center justify-between py-3 border-y border-outline-variant/15 dark:border-slate-800">
               <div className="flex items-center gap-4">
                 <span className="text-xs font-bold text-primary dark:text-blue-400 w-8">중식</span>
-                <p className="text-sm text-on-surface dark:text-slate-200">잡곡밥, 육개장, 돈까스, 샐러드</p>
+                <p className="text-sm text-on-surface dark:text-slate-200 break-all">{mealInfo.lunch}</p>
               </div>
               <button className="text-on-surface-variant dark:text-slate-400 hover:text-primary dark:hover:text-blue-400 transition-colors flex">
                 <span className="material-symbols-outlined text-lg" translate="no">chevron_right</span>
@@ -111,7 +186,7 @@ export const DashboardPage: React.FC = () => {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <span className="text-xs font-bold text-primary dark:text-blue-400 w-8">석식</span>
-                <p className="text-sm text-on-surface dark:text-slate-200">비빔밥, 된장찌개, 계란말이</p>
+                <p className="text-sm text-on-surface dark:text-slate-200 break-all">{mealInfo.dinner}</p>
               </div>
               <button className="text-on-surface-variant dark:text-slate-400 hover:text-primary dark:hover:text-blue-400 transition-colors flex">
                 <span className="material-symbols-outlined text-lg" translate="no">chevron_right</span>
