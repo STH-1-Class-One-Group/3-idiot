@@ -74,12 +74,14 @@ export const DashboardPage: React.FC = () => {
       }
     };
 
-    const processMealData = (data: MealData[]) => {
+    const processMealData = (data: any[]) => {
       const cleanString = (str?: string) => str ? str.replace(/\([^)]*\)/g, '').trim() : '';
 
       const breakfastItems = data.map(item => cleanString(item.brst)).filter(item => item !== '');
-      const lunchItems = data.map(item => cleanString(item.lnch)).filter(item => item !== '');
-      const dinnerItems = data.map(item => cleanString(item.dnr)).filter(item => item !== '');
+      // lnch와 lunc 필드 중 데이터가 있는 것을 사용
+      const lunchItems = data.map(item => cleanString(item.lnch || item.lunc)).filter(item => item !== '');
+      // dnr과 dinr 필드 중 데이터가 있는 것을 사용
+      const dinnerItems = data.map(item => cleanString(item.dnr || item.dinr)).filter(item => item !== '');
       
       setMealInfo({
         breakfast: breakfastItems.length > 0 ? breakfastItems.join(', ') : '메뉴 없음',
