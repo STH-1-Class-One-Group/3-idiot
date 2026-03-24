@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { MealPopup, MealItem } from './components/MealPopup';
 
 interface MealData {
@@ -38,6 +39,7 @@ const getTodayDisplayString = () => {
 };
 
 export const DashboardPage: React.FC = () => {
+  const navigate = useNavigate();
   const [mealInfo, setMealInfo] = useState({ breakfast: '불러오는 중...', lunch: '불러오는 중...', dinner: '불러오는 중...' });
 
   const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -283,7 +285,9 @@ export const DashboardPage: React.FC = () => {
               </button>
             </div>
           </div>
-          <button className="mt-auto pt-6 text-sm font-bold text-primary dark:text-blue-400 flex items-center gap-1 hover:gap-2 transition-all">
+          <button 
+            onClick={() => navigate('/Meal')}
+            className="mt-auto pt-6 text-sm font-bold text-primary dark:text-blue-400 flex items-center gap-1 hover:gap-2 transition-all">
             전체 식단표 보기 <span className="material-symbols-outlined text-sm" translate="no">arrow_forward</span>
           </button>
         </div>
