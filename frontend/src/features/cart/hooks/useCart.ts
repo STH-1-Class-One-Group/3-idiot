@@ -8,7 +8,7 @@
 // → 훅으로 분리하면 컴포넌트는 "UI 렌더링"만, 훅은 "데이터 처리"만 담당.
 // ─────────────────────────────────────────────────────────────
 import { useState, useEffect, useCallback } from 'react';
-import { getCartItems, removeFromCart, clearCart } from '../services/cartService';
+import { getCartItems, removeFromCart, clearCart, updateQuantity } from '../services/cartService';
 import type { CartItemWithFood } from '../types/cart.types';
 import { useCartContext } from '../context/CartContext';
 
@@ -67,6 +67,21 @@ export function useCart() {
     }
   };
 
+  // 수량 업데이트
+  const handleUpdateQuantity = async (cartItemId: string, newQuantity: number) => {
+    try {
+      await updateQuantity(cartItemId, newQuantity);
+      // 업데이트 후 상태에서도 즉시 변경 (UX 향상)
+      setCartItems((prev) =>
+        prev.map((item) =>
+          item.id === cartItemId ? { ...item, quantity: newQuantity } : item
+        )
+      );
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
   // 총 가격 계산 (렌더링 때마다 재계산하지 않도록 여기서 처리)
   const totalPrice = cartItems.reduce(
     (sum, item) => sum + item.food_items.price * item.quantity,
@@ -83,6 +98,7 @@ export function useCart() {
     totalCount,
     handleRemove,
     handleClear,
+    handleUpdateQuantity,
     refetch: fetchCart,
   };
 }

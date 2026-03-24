@@ -26,6 +26,7 @@ export const CartDrawer: React.FC = () => {
     totalCount,
     handleRemove,
     handleClear,
+    handleUpdateQuantity,
   } = useCart();
 
   return (
@@ -75,6 +76,7 @@ export const CartDrawer: React.FC = () => {
               key={item.id}
               item={item}
               onRemove={handleRemove}
+              onUpdateQuantity={handleUpdateQuantity}
             />
           ))
         )}

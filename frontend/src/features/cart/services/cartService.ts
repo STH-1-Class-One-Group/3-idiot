@@ -118,3 +118,21 @@ export async function clearCart(): Promise<void> {
 
   if (error) throw error;
 }
+
+/**
+ * 장바구니 아이템의 수량을 업데이트합니다.
+ * @param targetId - cart_items 테이블의 id (UUID 문자열)
+ * @param newQuantity - 새로운 수량 (1 이상이어야 함)
+ */
+export async function updateQuantity(targetId: string, newQuantity: number): Promise<void> {
+  if (newQuantity < 1) {
+    throw new Error('수량은 1 이상이어야 합니다.');
+  }
+
+  const { error } = await supabase
+    .from('cart_items')
+    .update({ quantity: newQuantity })
+    .eq('id', targetId);
+
+  if (error) throw error;
+}
