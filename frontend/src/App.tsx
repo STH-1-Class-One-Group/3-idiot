@@ -5,6 +5,7 @@ import { Header } from './components/layout/Header';
 import { Footer } from './components/layout/Footer';
 import { DashboardPage } from './features/dashboard/DashboardPage';
 import { MealPage } from './features/meal/MealPage';
+import { NewsPage } from './features/news/NewsPage';
 import { ShopPage } from './features/shop/ShopPage';
 import { CartProvider } from './features/cart/context/CartContext';
 import { CartModal } from './features/cart/components/CartModal';
@@ -60,6 +61,7 @@ const App: React.FC = () => {
               <Route path="/" element={<ShopPage />} />
               <Route path="/Dashboard" element={<DashboardPage />} />
               <Route path="/Meal" element={<MealPage />} />
+              <Route path="/News" element={<NewsPage />} />
             </Routes>
           </main>
           <Footer />
