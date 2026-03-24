@@ -11,6 +11,9 @@ import { CartProvider } from './features/cart/context/CartContext';
 import { CartModal } from './features/cart/components/CartModal';
 import { supabase } from './api/supabaseClient';
 import { ProfileSetupModal, Profile } from './components/common/ProfileSetupModal';
+import { CommunityPage } from './features/community/CommunityPage';
+import { PostDetailPage } from './features/community/PostDetailPage';
+import { PostWritePage } from './features/community/PostWritePage';
 
 const App: React.FC = () => {
   // ── 로그인 상태 관리 ──────────────────────────────────────────
@@ -23,8 +26,24 @@ const App: React.FC = () => {
   useEffect(() => {
     // 1) 앱 최초 로드 시 현재 세션 확인
     //    페이지 새로고침 후에도 로그인 상태를 복원하기 위함
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+      if (currentUser) {
+        const { data } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', currentUser.id)
+          .maybeSingle();
+        if (data) {
+          setProfile(data as Profile);
+        } else {
+          setProfile(null);
+          setShowProfileSetup(true);
+        }
+      } else {
+        setProfile(null);
+      }
     });
 
     // 2) 이후 로그인/로그아웃 이벤트를 실시간으로 감지
@@ -85,6 +104,10 @@ const App: React.FC = () => {
               <Route path="/Dashboard" element={<DashboardPage />} />
               <Route path="/Meal" element={<MealPage />} />
               <Route path="/News" element={<NewsPage />} />
+              <Route path="/Community" element={<CommunityPage user={user} profile={profile ?? null} />} />
+              <Route path="/Community/write" element={<PostWritePage user={user} profile={profile ?? null} />} />
+              <Route path="/Community/:postId" element={<PostDetailPage user={user} profile={profile ?? null} />} />
+              <Route path="/Community/:postId/edit" element={<PostWritePage user={user} profile={profile ?? null} />} />
             </Routes>
           </main>
           <Footer />
