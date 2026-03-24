@@ -48,7 +48,7 @@ export const CalendarPopup: React.FC<CalendarPopupProps> = ({
     // Fill prev month days
     for (let i = firstDayIdx - 1; i >= 0; i--) {
       days.push(
-        <span key={`prev-${i}`} className="py-1 text-slate-300 dark:text-slate-600 cursor-not-allowed">
+        <span key={`prev-${i}`} className="py-2 text-sm text-slate-300 dark:text-slate-600 cursor-not-allowed">
           {prevMonthDays - i}
         </span>
       );
@@ -66,15 +66,15 @@ export const CalendarPopup: React.FC<CalendarPopupProps> = ({
         new Date().getMonth() === currentMonth.getMonth() &&
         new Date().getDate() === i;
 
-      let wrapperClass = "py-1 cursor-pointer hover:bg-surface-container-high dark:hover:bg-slate-800 rounded-full transition-colors";
-      let textClass = "font-medium text-on-surface dark:text-slate-200";
+      let wrapperClass = "py-2 cursor-pointer hover:bg-surface-container-high dark:hover:bg-slate-800 rounded-full transition-colors";
+      let textClass = "font-medium text-sm text-on-surface dark:text-slate-200";
 
       if (isSelected) {
-        wrapperClass = "py-1 bg-primary dark:bg-blue-600 meal-gradient rounded-full shadow-md";
-        textClass = "text-white font-bold";
+        wrapperClass = "py-2 bg-primary dark:bg-blue-600 meal-gradient rounded-full shadow-md";
+        textClass = "text-white text-sm font-bold";
       } else if (isToday) {
-        wrapperClass = "py-1 bg-surface-container-high dark:bg-slate-700 rounded-full";
-        textClass = "text-primary dark:text-blue-400 font-bold";
+        wrapperClass = "py-2 bg-surface-container-high dark:bg-slate-700 rounded-full";
+        textClass = "text-primary dark:text-blue-400 text-sm font-bold";
       }
 
       days.push(
@@ -93,7 +93,7 @@ export const CalendarPopup: React.FC<CalendarPopupProps> = ({
     const remainingCells = 42 - totalCells;
     for (let i = 1; i <= remainingCells; i++) {
       days.push(
-        <span key={`next-${i}`} className="py-1 text-slate-300 dark:text-slate-600 cursor-not-allowed">
+        <span key={`next-${i}`} className="py-2 text-sm text-slate-300 dark:text-slate-600 cursor-not-allowed">
           {i}
         </span>
       );
@@ -111,21 +111,21 @@ export const CalendarPopup: React.FC<CalendarPopupProps> = ({
         onClick={onClose}
       ></div>
 
-      <div className="relative w-64 bg-surface-container-lowest dark:bg-slate-900 rounded-3xl shadow-2xl p-6 flex flex-col space-y-4 border border-outline-variant/10 dark:border-slate-800">
-        <div className="flex justify-between items-center mb-2">
-          <span className="font-bold text-sm text-on-surface dark:text-white">
+      <div className="relative w-80 bg-surface-container-lowest dark:bg-slate-900 rounded-3xl shadow-2xl p-6 flex flex-col space-y-4 border border-outline-variant/10 dark:border-slate-800">
+        <div className="flex justify-between items-center mb-4">
+          <span className="font-bold text-lg text-on-surface dark:text-white">
             {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
           </span>
-          <div className="flex space-x-2">
+          <div className="flex space-x-3">
             <span 
-              className="material-symbols-outlined text-sm cursor-pointer hover:text-primary transition-colors text-on-surface-variant dark:text-slate-400" 
+              className="material-symbols-outlined text-lg cursor-pointer hover:text-primary transition-colors text-on-surface-variant dark:text-slate-400" 
               onClick={handlePrevMonth}
               translate="no"
             >
               chevron_left
             </span>
             <span 
-              className="material-symbols-outlined text-sm cursor-pointer hover:text-primary transition-colors text-on-surface-variant dark:text-slate-400" 
+              className="material-symbols-outlined text-lg cursor-pointer hover:text-primary transition-colors text-on-surface-variant dark:text-slate-400" 
               onClick={handleNextMonth}
               translate="no"
             >
@@ -134,16 +134,16 @@ export const CalendarPopup: React.FC<CalendarPopupProps> = ({
           </div>
         </div>
         
-        <div className="grid grid-cols-7 gap-1 text-[10px] text-center font-bold text-on-surface-variant dark:text-slate-400">
+        <div className="grid grid-cols-7 gap-2 text-xs text-center font-bold text-on-surface-variant dark:text-slate-400">
           <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
         </div>
         
-        <div className="grid grid-cols-7 gap-1 text-[10px] text-center">
+        <div className="grid grid-cols-7 gap-2 text-center">
           {renderDays()}
         </div>
 
         <button 
-          className="text-[10px] font-bold text-primary dark:text-blue-400 uppercase pt-2 text-center hover:underline"
+          className="text-sm font-bold text-primary dark:text-blue-400 uppercase pt-3 text-center hover:underline"
           onClick={() => {
             onSelectDate(new Date());
             onClose();
