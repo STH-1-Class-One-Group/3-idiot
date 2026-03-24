@@ -17,6 +17,7 @@ interface DayMealData {
   breakfast: ParsedMeal;
   lunch:     ParsedMeal;
   dinner:    ParsedMeal;
+  dailyTotal: number;
 }
 
 const getDateInfo = (offset: number) => {
@@ -46,8 +47,15 @@ const getFallbackData = (displayString: string) => [
   {"dates": displayString, "brst": "", "brst_cal": "", "lnch": "", "lnch_cal": "", "dnr": "배추김치", "dnr_cal": "0kcal", "sum_cal": "2961.19kcal"},
 ];
 
-const processMealsAPI = (data: any[], _displayString: string): { b: ParsedMeal, l: ParsedMeal, d: ParsedMeal } => {
+const processMealsAPI = (data: any[], _displayString: string): { b: ParsedMeal, l: ParsedMeal, d: ParsedMeal, dailyTotal: number } => {
   const cleanString = (str?: string) => str ? str.replace(/\([^)]*\)/g, '').trim() : '';
+
+  let zeroCalCount = 0;
+  let sumCalBase = 0;
+  if (data.length > 0) {
+    const firstSumCalStr = data[0].sum_cal || "0";
+    sumCalBase = parseFloat(firstSumCalStr.replace(/[^0-9.]/g, '')) || 0;
+  }
 
   const parseItemAndCalorie = (nameStr?: string, calStr?: string): MealItem | null => {
     const name = cleanString(nameStr);
@@ -56,6 +64,7 @@ const processMealsAPI = (data: any[], _displayString: string): { b: ParsedMeal, 
     let calVal = calStr ? calStr.trim() : "";
     if (calVal === "" || calVal === "0kcal") {
       calVal = "53kcal";
+      zeroCalCount++;
     }
     return { name, calorie: calVal };
   };
@@ -80,10 +89,13 @@ const processMealsAPI = (data: any[], _displayString: string): { b: ParsedMeal, 
     return Math.round(sum * 100) / 100;
   };
 
+  const dailyTotal = Math.round((sumCalBase + (zeroCalCount * 53)) * 100) / 100;
+
   return {
     b: { items: bItems, totalCal: getSum(bItems) },
     l: { items: lItems, totalCal: getSum(lItems) },
-    d: { items: dItems, totalCal: getSum(dItems) }
+    d: { items: dItems, totalCal: getSum(dItems) },
+    dailyTotal
   };
 };
 
@@ -132,7 +144,8 @@ export const MealPage: React.FC = () => {
           isToday: offset === 0, // 0일때 하이라이트 되도록 처리
           breakfast: parsed.b,
           lunch: parsed.l,
-          dinner: parsed.d
+          dinner: parsed.d,
+          dailyTotal: parsed.dailyTotal
         } as DayMealData;
       });
 
@@ -258,6 +271,9 @@ export const MealPage: React.FC = () => {
                   <h2 className={`text-xl font-extrabold ${isToday ? 'text-primary dark:text-blue-400' : 'text-on-surface-variant dark:text-slate-300'}`}>
                     {dayData.title} ({dayData.shortDate})
                   </h2>
+                  <div className="mt-1 font-bold text-sm text-on-surface-variant dark:text-slate-400">
+                    총 <span className="text-primary dark:text-blue-400">{dayData.dailyTotal.toLocaleString()}</span> kcal
+                  </div>
                 </div>
 
                 {/* Breakfast */}
