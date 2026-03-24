@@ -56,12 +56,12 @@ async def fetch_news_thumbnail(title: str) -> Optional[str]:
             print(f"Error fetching image for title '{title}': {e}")
             return None
 
-async def get_defense_news() -> List[Dict]:
+async def get_defense_news(limit: int = 4) -> List[Dict]:
     """
     국방 관련 뉴스와 썸네일을 가져옵니다.
     """
     query = "국방 OR \"방위산업\" OR \"K-방산\""
-    news_items = await fetch_naver_news(query)
+    news_items = await fetch_naver_news(query, display=limit)
 
     results = []
     for item in news_items:
