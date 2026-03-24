@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { MealPopup, MealItem } from './components/MealPopup';
 
 interface MealData {
   dates: string;
@@ -39,6 +40,19 @@ const getTodayDisplayString = () => {
 export const DashboardPage: React.FC = () => {
   const [mealInfo, setMealInfo] = useState({ breakfast: '불러오는 중...', lunch: '불러오는 중...', dinner: '불러오는 중...' });
 
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [selectedMealType, setSelectedMealType] = useState('');
+  const [selectedMealItems, setSelectedMealItems] = useState<MealItem[]>([]);
+  const [selectedTotalCalories, setSelectedTotalCalories] = useState(0);
+  const [todayDateLabel, setTodayDateLabel] = useState('');
+
+  const [fullMealData, setFullMealData] = useState({
+    breakfastItems: [] as MealItem[],
+    lunchItems: [] as MealItem[],
+    dinnerItems: [] as MealItem[],
+    totalCalories: 0
+  });
+
   useEffect(() => {
     const fetchMeals = async () => {
       try {
@@ -77,21 +91,71 @@ export const DashboardPage: React.FC = () => {
     const processMealData = (data: any[]) => {
       const cleanString = (str?: string) => str ? str.replace(/\([^)]*\)/g, '').trim() : '';
 
-      const breakfastItems = data.map(item => cleanString(item.brst)).filter(item => item !== '');
-      // lnch와 lunc 필드 중 데이터가 있는 것을 사용
-      const lunchItems = data.map(item => cleanString(item.lnch || item.lunc)).filter(item => item !== '');
-      // dnr과 dinr 필드 중 데이터가 있는 것을 사용
-      const dinnerItems = data.map(item => cleanString(item.dnr || item.dinr)).filter(item => item !== '');
-      
+      let zeroCalCount = 0;
+      let sumCalBase = 0;
+      let currentDateLabel = getTodayDisplayString();
+
+      if (data.length > 0) {
+        currentDateLabel = data[0].dates || currentDateLabel;
+        setTodayDateLabel(currentDateLabel);
+        const firstSumCalStr = data[0].sum_cal || "0";
+        sumCalBase = parseFloat(firstSumCalStr.replace(/[^0-9.]/g, '')) || 0;
+      } else {
+        setTodayDateLabel(currentDateLabel);
+      }
+
+      const parseItemAndCalorie = (nameStr?: string, calStr?: string): MealItem | null => {
+        const name = cleanString(nameStr);
+        if (!name) return null;
+        
+        let calVal = calStr ? calStr.trim() : "";
+        if (calVal === "" || calVal === "0kcal") {
+          calVal = "53kcal";
+          zeroCalCount++;
+        }
+        return { name, calorie: calVal };
+      };
+
+      const bItems: MealItem[] = [];
+      const lItems: MealItem[] = [];
+      const dItems: MealItem[] = [];
+
+      data.forEach(item => {
+        const b = parseItemAndCalorie(item.brst, item.brst_cal);
+        if (b) bItems.push(b);
+        
+        const l = parseItemAndCalorie(item.lnch || item.lunc, item.lnch_cal || item.lunc_cal);
+        if (l) lItems.push(l);
+        
+        const d = parseItemAndCalorie(item.dnr || item.dinr, item.dnr_cal || item.dinr_cal);
+        if (d) dItems.push(d);
+      });
+
+      const adjustedTotalCalories = Math.round((sumCalBase + (zeroCalCount * 53)) * 100) / 100;
+
+      setFullMealData({
+        breakfastItems: bItems,
+        lunchItems: lItems,
+        dinnerItems: dItems,
+        totalCalories: adjustedTotalCalories
+      });
+
       setMealInfo({
-        breakfast: breakfastItems.length > 0 ? breakfastItems.join(', ') : '메뉴 없음',
-        lunch: lunchItems.length > 0 ? lunchItems.join(', ') : '메뉴 없음',
-        dinner: dinnerItems.length > 0 ? dinnerItems.join(', ') : '메뉴 없음'
+        breakfast: bItems.length > 0 ? bItems.map(i => i.name).join(', ') : '메뉴 없음',
+        lunch: lItems.length > 0 ? lItems.map(i => i.name).join(', ') : '메뉴 없음',
+        dinner: dItems.length > 0 ? dItems.map(i => i.name).join(', ') : '메뉴 없음'
       });
     };
 
     fetchMeals();
   }, []);
+
+  const handleMealClick = (mealType: string, items: MealItem[]) => {
+    setSelectedMealType(mealType);
+    setSelectedMealItems(items);
+    setSelectedTotalCalories(fullMealData.totalCalories);
+    setIsPopupOpen(true);
+  };
 
   return (
     <div className="space-y-16 w-full">
@@ -182,30 +246,39 @@ export const DashboardPage: React.FC = () => {
             <h2 className="text-xl font-bold text-on-surface dark:text-white">오늘 무엇을 먹나요?</h2>
           </div>
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div 
+              className="flex items-center justify-between cursor-pointer group hover:bg-surface-variant/30 p-2 rounded-lg transition-colors -mx-2"
+              onClick={() => handleMealClick('조식', fullMealData.breakfastItems)}
+            >
               <div className="flex items-center gap-4">
                 <span className="text-xs font-bold text-primary dark:text-blue-400 w-8">조식</span>
-                <p className="text-sm text-on-surface dark:text-slate-200 break-all">{mealInfo.breakfast}</p>
+                <p className="text-sm text-on-surface dark:text-slate-200 break-all group-hover:text-primary dark:group-hover:text-blue-400 transition-colors">{mealInfo.breakfast}</p>
               </div>
-              <button className="text-on-surface-variant dark:text-slate-400 hover:text-primary dark:hover:text-blue-400 transition-colors flex">
+              <button className="text-on-surface-variant dark:text-slate-400 group-hover:text-primary dark:group-hover:text-blue-400 transition-colors flex">
                 <span className="material-symbols-outlined text-lg" translate="no">chevron_right</span>
               </button>
             </div>
-            <div className="flex items-center justify-between py-3 border-y border-outline-variant/15 dark:border-slate-800">
+            <div 
+              className="flex items-center justify-between py-3 border-y border-outline-variant/15 dark:border-slate-800 cursor-pointer group hover:bg-surface-variant/30 p-2 rounded-lg transition-colors -mx-2"
+              onClick={() => handleMealClick('중식', fullMealData.lunchItems)}
+            >
               <div className="flex items-center gap-4">
                 <span className="text-xs font-bold text-primary dark:text-blue-400 w-8">중식</span>
-                <p className="text-sm text-on-surface dark:text-slate-200 break-all">{mealInfo.lunch}</p>
+                <p className="text-sm text-on-surface dark:text-slate-200 break-all group-hover:text-primary dark:group-hover:text-blue-400 transition-colors">{mealInfo.lunch}</p>
               </div>
-              <button className="text-on-surface-variant dark:text-slate-400 hover:text-primary dark:hover:text-blue-400 transition-colors flex">
+              <button className="text-on-surface-variant dark:text-slate-400 group-hover:text-primary dark:group-hover:text-blue-400 transition-colors flex">
                 <span className="material-symbols-outlined text-lg" translate="no">chevron_right</span>
               </button>
             </div>
-            <div className="flex items-center justify-between">
+            <div 
+              className="flex items-center justify-between cursor-pointer group hover:bg-surface-variant/30 p-2 rounded-lg transition-colors -mx-2"
+              onClick={() => handleMealClick('석식', fullMealData.dinnerItems)}
+            >
               <div className="flex items-center gap-4">
                 <span className="text-xs font-bold text-primary dark:text-blue-400 w-8">석식</span>
-                <p className="text-sm text-on-surface dark:text-slate-200 break-all">{mealInfo.dinner}</p>
+                <p className="text-sm text-on-surface dark:text-slate-200 break-all group-hover:text-primary dark:group-hover:text-blue-400 transition-colors">{mealInfo.dinner}</p>
               </div>
-              <button className="text-on-surface-variant dark:text-slate-400 hover:text-primary dark:hover:text-blue-400 transition-colors flex">
+              <button className="text-on-surface-variant dark:text-slate-400 group-hover:text-primary dark:group-hover:text-blue-400 transition-colors flex">
                 <span className="material-symbols-outlined text-lg" translate="no">chevron_right</span>
               </button>
             </div>
@@ -240,6 +313,16 @@ export const DashboardPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* 식단 팝업 컴포넌트 */}
+      <MealPopup 
+        isOpen={isPopupOpen}
+        onClose={() => setIsPopupOpen(false)}
+        mealType={selectedMealType}
+        dateLabel={todayDateLabel}
+        items={selectedMealItems}
+        totalCalories={selectedTotalCalories}
+      />
     </div>
   );
 };
