@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MealPopup, MealItem } from './components/MealPopup';
 
@@ -66,6 +66,7 @@ const DEFAULT_MEAL_INFO = {
 
 export const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
+  const didInitRef = useRef(false);
 
   const [mealInfo, setMealInfo] = useState(DEFAULT_MEAL_INFO);
   const [newsList, setNewsList] = useState<NewsItem[]>([]);
@@ -85,6 +86,11 @@ export const DashboardPage: React.FC = () => {
   });
 
   useEffect(() => {
+    if (didInitRef.current) {
+      return;
+    }
+    didInitRef.current = true;
+
     const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
     const processMealData = async (data: MealData[]) => {
@@ -203,7 +209,12 @@ export const DashboardPage: React.FC = () => {
 
             const data: NewsItem[] = await response.json();
             if (data.length > 0) {
-              setNewsList((prev) => [...prev, data[0]]);
+              setNewsList((prev) => {
+                if (prev.some((item) => item.link === data[0].link)) {
+                  return prev;
+                }
+                return [...prev, data[0]];
+              });
             }
           })
         );
