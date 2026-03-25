@@ -11,9 +11,11 @@ interface ProductCardProps {
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const [cartLoading, setCartLoading] = useState(false);
   const [feedback, setFeedback] = useState<{ msg: string; ok: boolean } | null>(null);
-  const { openCart } = useCartContext();
+  
+  // ⭐ 핵심: fetchCartItems 대신, 실제 Context에 있는 이름인 fetchCart를 가져옵니다.
+  const { fetchCart } = useCartContext();
 
-  // 이미지 URL 처리 (Storage 경로면 publicUrl로 변환)
+  // 이미지 URL 처리
   const imageUrl = product.image_url.startsWith('http')
     ? product.image_url
     : supabase.storage.from('food-images').getPublicUrl(product.image_url).data.publicUrl;
@@ -22,10 +24,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     setCartLoading(true);
     setFeedback(null);
     try {
-      // food_id는 number 타입 (INTEGER) 그대로 전달
+      // 1. DB에 저장
       await addToCart({ food_id: product.id });
+
+      // 2. ⭐ 저장 성공 후, Context의 fetchCart를 실행해서 화면을 갱신합니다.
+      if (fetchCart) {
+        await fetchCart();
+      }
+
       setFeedback({ msg: '✅ 장바구니에 담겼습니다!', ok: true });
-      // 2초 후 메시지 사라짐
       setTimeout(() => setFeedback(null), 2000);
     } catch (err: any) {
       const isAuthError = err.message === '로그인이 필요합니다.';
@@ -52,7 +59,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         <h3 className="text-lg font-bold text-on-surface mb-2 tracking-tight">{product.name}</h3>
         <p className="text-on-surface-variant text-sm mb-4 line-clamp-2">칼로리: {product.calories} kcal</p>
 
-        {/* 피드백 메시지 — 담기 성공/실패 시 표시 */}
         {feedback && (
           <p className={`text-xs mb-2 text-center font-medium ${feedback.ok ? 'text-green-600' : 'text-red-500'}`}>
             {feedback.msg}
@@ -65,7 +71,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             <button className="w-10 h-10 flex items-center justify-center rounded-full bg-surface-container-low text-on-surface hover:bg-primary hover:text-on-primary transition-all">
               <span className="material-symbols-outlined text-[20px]" translate="no">credit_card</span>
             </button>
-            {/* 장바구니 담기 버튼 */}
             <button
               onClick={handleAddToCart}
               disabled={cartLoading}
