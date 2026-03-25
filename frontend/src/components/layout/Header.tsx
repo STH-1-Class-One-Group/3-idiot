@@ -5,6 +5,8 @@ import { LoginModal } from '../common/LoginModal';
 import { CartIcon } from '../../features/cart/components/CartIcon';
 import { Profile } from '../common/ProfileSetupModal';
 
+const brandLogoSrc = `${process.env.PUBLIC_URL}/logo.png`;
+
 // ── Props 인터페이스 ──────────────────────────────────────────
 // App.tsx에서 내려주는 user 정보와 로그아웃 함수를 타입으로 명시
 interface HeaderProps {
@@ -77,9 +79,18 @@ export const Header: React.FC<HeaderProps> = ({ user, profile, onSignOut }) => {
   return (
     <>
       <nav className="fixed top-0 w-full z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg shadow-[0_12px_40px_rgba(27,28,28,0.06)] flex justify-between items-center px-8 h-16 max-w-full transition-colors">
-        <div className="text-xl font-bold tracking-tighter text-blue-800 dark:text-blue-300">
-          Modern Sentinel
-        </div>
+        <NavLink
+          to="/"
+          className="flex items-center shrink-0"
+          aria-label="홈으로 이동"
+        >
+          <img
+            src={brandLogoSrc}
+            alt="TeamC service logo"
+            className="h-12 w-auto object-contain"
+          />
+          <span className="sr-only">TeamC</span>
+        </NavLink>
         <div className="hidden md:flex items-center space-x-8">
           <NavLink
             to="/"
