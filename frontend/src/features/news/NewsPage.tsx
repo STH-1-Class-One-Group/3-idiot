@@ -31,7 +31,6 @@ export const NewsPage: React.FC = () => {
   const totalPages = Math.max(1, Math.ceil(filteredNews.length / itemsPerPage));
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentNews = filteredNews.slice(startIndex, startIndex + itemsPerPage);
-  const hasSingleRowResults = !isLoading && currentNews.length > 0 && currentNews.length <= 4;
 
   useEffect(() => {
     if (didInitRef.current) {
@@ -133,8 +132,8 @@ export const NewsPage: React.FC = () => {
         </div>
 
         <div
-          className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 ${
-            hasSingleRowResults ? '' : 'min-h-[400px]'
+          className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 items-start gap-6 ${
+            !isLoading && currentNews.length > 0 && currentNews.length <= 4 ? '' : 'min-h-[400px]'
           }`}
         >
           {currentNews.length > 0 ? (
@@ -147,7 +146,7 @@ export const NewsPage: React.FC = () => {
               return (
                 <div
                   key={news.link}
-                  className={`group cursor-pointer flex flex-col ${hasSingleRowResults ? '' : 'h-full'}`}
+                  className="group cursor-pointer self-start"
                   onClick={() => window.open(news.link, '_blank')}
                 >
                   <div className="aspect-video w-full rounded-lg bg-surface-dim dark:bg-slate-800 mb-4 overflow-hidden flex-shrink-0">
@@ -162,12 +161,12 @@ export const NewsPage: React.FC = () => {
                       }}
                     />
                   </div>
-                  <div className={`flex flex-col ${hasSingleRowResults ? '' : 'flex-grow'}`}>
+                  <div>
                     <h3
                       className="text-base font-bold text-on-surface dark:text-white leading-snug group-hover:text-primary dark:group-hover:text-blue-400 transition-colors line-clamp-3 mb-2"
                       dangerouslySetInnerHTML={{ __html: news.title }}
                     />
-                    <p className="text-xs text-on-surface-variant dark:text-slate-500 mt-auto font-medium">
+                    <p className="text-xs text-on-surface-variant dark:text-slate-500 font-medium">
                       {news.pubDate}
                     </p>
                   </div>
