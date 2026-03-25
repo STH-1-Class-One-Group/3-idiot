@@ -11,7 +11,7 @@
 
 ---
 
-## `(next)` `perf: optimize community RLS policies`
+## `1c8204b` `perf: optimize community RLS policies`
 
 ### 무엇을 했는가
 - 커뮤니티 RLS 정책을 Supabase 권장 성능 패턴으로 정리하는 SQL을 추가했습니다.
@@ -29,6 +29,7 @@
 ### 팀원이 알아야 할 점
 - 기존 DB는 `community_rls_performance_patch.sql`을 직접 실행해야 반영됩니다.
 - 이 변경은 기능 변경이 아니라 정책 평가 성능 최적화입니다.
+- 2026-03-26 기준으로 해당 SQL은 Supabase에 이미 실행 완료했습니다.
 
 ---
 
@@ -60,6 +61,7 @@
 - 이 커밋만으로도 체감속도는 빨라집니다.
 - DB 인덱스 효과까지 받으려면 `backend/sql/community_performance_patch.sql`을 Supabase SQL Editor에서 별도로 실행해야 합니다.
 - `count=planned`는 속도는 더 빠르지만 큰 규모에서는 total이 근사치일 수 있습니다.
+- 2026-03-26 기준으로 `community_performance_patch.sql`도 Supabase에 이미 실행 완료했습니다.
 
 ---
 
@@ -237,5 +239,6 @@
 
 - 커뮤니티 기능 기본 흐름은 구현 완료
 - 최근 두 성능 커밋으로 게시판 체감속도 개선
-- DB 인덱스 패치 SQL은 별도 실행 전이라면 아직 적용 안 된 상태일 수 있음
+- `community_performance_patch.sql` 적용 완료
+- `community_rls_performance_patch.sql` 적용 완료
 - 브랜치 기반 설명 문서이므로, 이후 커밋이 쌓이면 같은 형식으로 아래에 추가하면 됩니다
