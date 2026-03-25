@@ -15,6 +15,7 @@ export interface Profile {
 interface ProfileSetupModalProps {
   user: User;
   onProfileCreated: (profile: Profile) => void;
+  onSignOut: () => void;
 }
 
 const RANKS = [
@@ -24,7 +25,7 @@ const RANKS = [
   '준장', '소장', '중장', '대장',
 ];
 
-export const ProfileSetupModal: React.FC<ProfileSetupModalProps> = ({ user, onProfileCreated }) => {
+export const ProfileSetupModal: React.FC<ProfileSetupModalProps> = ({ user, onProfileCreated, onSignOut }) => {
   const [nickname, setNickname] = useState('');
   const [rank, setRank] = useState('');
   const [unit, setUnit] = useState('');
@@ -164,6 +165,15 @@ export const ProfileSetupModal: React.FC<ProfileSetupModalProps> = ({ user, onPr
             {isSubmitting ? '저장 중...' : '시작하기'}
           </button>
         </form>
+
+        <div className="mt-4 text-center">
+          <button
+            onClick={onSignOut}
+            className="text-xs text-slate-400 hover:text-red-400 transition-colors"
+          >
+            로그아웃
+          </button>
+        </div>
       </div>
     </div>
   );

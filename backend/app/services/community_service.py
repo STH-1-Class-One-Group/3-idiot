@@ -23,22 +23,44 @@ def _base_headers(token: Optional[str] = None) -> dict:
 # 게시글 관련
 # ────────────────────────────────────────────────────────────
 
-async def get_posts(page: int, per_page: int, category: Optional[str]) -> dict:
+def _build_post_filters(
+    category: Optional[str],
+    query: Optional[str],
+    search_type: str,
+) -> dict:
+    filters: dict[str, str] = {}
+    if category and category != "all":
+        filters["category"] = f"eq.{category}"
+
+    keyword = (query or "").strip()
+    if keyword:
+        pattern = f"*{keyword}*"
+        if search_type == "title_content":
+            filters["or"] = f"(title.ilike.{pattern},content.ilike.{pattern})"
+        else:
+            filters["title"] = f"ilike.{pattern}"
+
+    return filters
+
+
+async def get_posts(
+    page: int,
+    per_page: int,
+    category: Optional[str],
+    query: Optional[str],
+    search_type: str,
+) -> dict:
     """게시글 목록 조회 (author 프로필 JOIN, 페이지네이션)."""
     offset = (page - 1) * per_page
-    select = "id,title,content,category,views,created_at,updated_at,profiles(id,nickname,rank,avatar_url)"
+    select = "id,post_number,title,content,category,views,created_at,updated_at,profiles(id,nickname,rank,avatar_url)"
     params = {
         "select": select,
-        "order": "created_at.desc",
+        "order": "post_number.desc",
         "limit": str(per_page),
         "offset": str(offset),
     }
-    if category and category != "all":
-        params["category"] = f"eq.{category}"
-
-    count_params = {"select": "id"}
-    if category and category != "all":
-        count_params["category"] = f"eq.{category}"
+    filters = _build_post_filters(category=category, query=query, search_type=search_type)
+    params.update(filters)
 
     async with httpx.AsyncClient() as client:
         headers = _base_headers()
@@ -51,11 +73,11 @@ async def get_posts(page: int, per_page: int, category: Optional[str]) -> dict:
         res.raise_for_status()
         rows = res.json()
 
-        # 전체 건수 (Range 헤더 활용)
-        count_res = await client.get(
+        # 전체 건수
+        count_res = await client.head(
             f"{SUPABASE_REST}/community_posts",
             headers={**headers, "Prefer": "count=exact"},
-            params=count_params,
+            params={"select": "id", **filters},
         )
         count_res.raise_for_status()
         content_range = count_res.headers.get("content-range", "0-0/0")
@@ -67,7 +89,7 @@ async def get_posts(page: int, per_page: int, category: Optional[str]) -> dict:
 
 async def get_post_detail(post_id: str) -> Optional[dict]:
     """게시글 상세 조회."""
-    select = "id,title,content,category,views,created_at,updated_at,profiles(id,nickname,rank,avatar_url)"
+    select = "id,post_number,title,content,category,views,created_at,updated_at,profiles(id,nickname,rank,avatar_url)"
     async with httpx.AsyncClient() as client:
         res = await client.get(
             f"{SUPABASE_REST}/community_posts",
@@ -206,6 +228,7 @@ def _format_post(row: dict) -> dict:
     profile = row.get("profiles") or {}
     return {
         "id": row["id"],
+        "post_number": row.get("post_number", 0),
         "title": row["title"],
         "content": row["content"],
         "category": row["category"],

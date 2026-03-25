@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { NavLink } from 'react-router-dom';
 import { User } from '@supabase/supabase-js';
 import { LoginModal } from '../common/LoginModal';
@@ -10,7 +10,7 @@ import { Profile } from '../common/ProfileSetupModal';
 interface HeaderProps {
   user: User | null;       // 로그인 상태면 User 객체, 아니면 null
   profile: Profile | null; // 서비스 내 프로필 (없으면 null)
-  onSignOut: () => void;   // 로그아웃 실행 함수
+  onSignOut: () => Promise<void> | void;   // 로그아웃 실행 함수
 }
 
 export const Header: React.FC<HeaderProps> = ({ user, profile, onSignOut }) => {
@@ -26,6 +26,7 @@ export const Header: React.FC<HeaderProps> = ({ user, profile, onSignOut }) => {
 
   // 드롭다운 메뉴(로그아웃 버튼) 열림/닫힘 상태
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const profileMenuRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (isDarkMode) {
@@ -40,17 +41,27 @@ export const Header: React.FC<HeaderProps> = ({ user, profile, onSignOut }) => {
   // 드롭다운 외부 클릭 시 닫힘 처리
   useEffect(() => {
     if (!isDropdownOpen) return;
-    const handleClickOutside = () => setIsDropdownOpen(false);
-    document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        profileMenuRef.current &&
+        !profileMenuRef.current.contains(event.target as Node)
+      ) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isDropdownOpen]);
 
   const toggleDarkMode = () => setIsDarkMode(!isDarkMode);
 
   // 로그아웃: 함수 실행 후 드롭다운도 닫기
-  const handleSignOut = () => {
+  const handleSignOut = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
     setIsDropdownOpen(false);
-    onSignOut(); // App.tsx에서 내려온 supabase.auth.signOut()
+    await onSignOut(); // App.tsx에서 내려온 supabase.auth.signOut()
   };
 
   // 프로필 이미지: OAuth 제공자에서 받은 avatar_url 사용, 없으면 기본 이니셜
@@ -130,7 +141,7 @@ export const Header: React.FC<HeaderProps> = ({ user, profile, onSignOut }) => {
           {/* ── 로그인 상태에 따라 다른 UI 렌더링 ── */}
           {user ? (
             // ✅ 로그인 상태: 프로필 이미지 + 드롭다운
-            <div className="relative">
+            <div ref={profileMenuRef} className="relative">
               <button
                 onClick={(e) => {
                   e.stopPropagation(); // 외부 클릭 닫힘 방지

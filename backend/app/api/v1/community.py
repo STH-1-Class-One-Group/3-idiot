@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Query, Header
-from typing import Optional
+from typing import Literal, Optional
 from app.schemas.community_schema import PostCreate, PostUpdate, CommentCreate
 from app.services import community_service
 
@@ -25,11 +25,19 @@ def _require_token(authorization: Optional[str]) -> str:
 @router.get("/community/posts")
 async def list_posts(
     page: int = Query(1, ge=1),
-    per_page: int = Query(10, ge=1, le=50),
+    per_page: int = Query(30, ge=1, le=100),
     category: Optional[str] = Query(None),
+    query: Optional[str] = Query(None),
+    search_type: Literal["title", "title_content"] = Query("title"),
 ):
     """게시글 목록 조회 (비로그인 허용)."""
-    return await community_service.get_posts(page=page, per_page=per_page, category=category)
+    return await community_service.get_posts(
+        page=page,
+        per_page=per_page,
+        category=category,
+        query=query,
+        search_type=search_type,
+    )
 
 
 # ────────────────────────────────────────────────────────────

@@ -23,6 +23,7 @@ class PostUpdate(BaseModel):
 
 class PostResponse(BaseModel):
     id: str
+    post_number: int
     title: str
     content: str
     category: str

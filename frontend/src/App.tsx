@@ -15,6 +15,53 @@ import { CommunityPage } from './features/community/CommunityPage';
 import { PostDetailPage } from './features/community/PostDetailPage';
 import { PostWritePage } from './features/community/PostWritePage';
 
+type StorageEntry = {
+  key: string;
+  store: Storage;
+};
+
+const getSupabaseAuthStorageEntries = (): StorageEntry[] => {
+  if (typeof window === 'undefined') {
+    return [];
+  }
+
+  const stores = [window.localStorage, window.sessionStorage];
+  const entries: StorageEntry[] = [];
+
+  for (const store of stores) {
+    for (const key of Object.keys(store)) {
+      if (key.startsWith('sb-') || key.startsWith('supabase.auth.')) {
+        entries.push({ key, store });
+      }
+    }
+  }
+
+  return entries;
+};
+
+const clearSupabaseAuthStorage = () => {
+  for (const entry of getSupabaseAuthStorageEntries()) {
+    entry.store.removeItem(entry.key);
+  }
+};
+
+const hasSupabaseAuthStorage = () => getSupabaseAuthStorageEntries().length > 0;
+
+const loadProfile = async (currentUser: User): Promise<Profile | null> => {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', currentUser.id)
+    .maybeSingle();
+
+  if (error) {
+    console.error('[App] profile lookup failed:', error);
+    return null;
+  }
+
+  return (data as Profile | null) ?? null;
+};
+
 const App: React.FC = () => {
   // ── 로그인 상태 관리 ──────────────────────────────────────────
   // User | null: 로그인 시 User 객체, 비로그인 시 null
@@ -24,67 +71,114 @@ const App: React.FC = () => {
   const [showProfileSetup, setShowProfileSetup] = useState(false);
 
   useEffect(() => {
-    // 1) 앱 최초 로드 시 현재 세션 확인
-    //    페이지 새로고침 후에도 로그인 상태를 복원하기 위함
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+    let isActive = true;
+
+    const syncInitialSession = async () => {
+      const {
+        data: { session },
+        error,
+      } = await supabase.auth.getSession();
+
+      if (!isActive) {
+        return;
+      }
+
+      if (error) {
+        console.error('[App] getSession failed:', error);
+      }
+
       const currentUser = session?.user ?? null;
       setUser(currentUser);
-      if (currentUser) {
-        const { data } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', currentUser.id)
-          .maybeSingle();
-        if (data) {
-          setProfile(data as Profile);
-        } else {
-          setProfile(null);
-          setShowProfileSetup(true);
-        }
-      } else {
+      if (!currentUser) {
         setProfile(null);
+        setShowProfileSetup(false);
+      }
+    };
+
+    void syncInitialSession();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!isActive) {
+        return;
+      }
+
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+
+      if (!currentUser) {
+        setProfile(null);
+        setShowProfileSetup(false);
       }
     });
 
-    // 2) 이후 로그인/로그아웃 이벤트를 실시간으로 감지
-    //    onAuthStateChange는 Supabase가 자동으로 호출해주는 이벤트 리스너
-    //    - SIGNED_IN : 로그인 성공 → session.user로 상태 업데이트
-    //    - SIGNED_OUT: 로그아웃   → null로 상태 업데이트
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        const currentUser = session?.user ?? null;
-        setUser(currentUser);
-        if (currentUser) {
-          // 로그인 시 profiles 테이블 조회 → 없으면 프로필 설정 모달 표시
-          const { data } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', currentUser.id)
-            .maybeSingle();
-          if (data) {
-            setProfile(data as Profile);
-            setShowProfileSetup(false);
-          } else {
-            setProfile(null);
-            setShowProfileSetup(true);
-          }
-        } else {
-          // 로그아웃 시 프로필 초기화
-          setProfile(null);
-          setShowProfileSetup(false);
-        }
-      }
-    );
-
-    // 3) 컴포넌트가 언마운트될 때 리스너 정리 (메모리 누수 방지)
-    return () => subscription.unsubscribe();
+    return () => {
+      isActive = false;
+      subscription.unsubscribe();
+    };
   }, []);
+
+  useEffect(() => {
+    let isActive = true;
+
+    const syncProfile = async () => {
+      if (user === undefined) {
+        return;
+      }
+
+      if (!user) {
+        setProfile(null);
+        setShowProfileSetup(false);
+        return;
+      }
+
+      setProfile(undefined);
+      setShowProfileSetup(false);
+
+      const nextProfile = await loadProfile(user);
+      if (!isActive) {
+        return;
+      }
+
+      setProfile(nextProfile);
+      setShowProfileSetup(!nextProfile);
+    };
+
+    void syncProfile();
+
+    return () => {
+      isActive = false;
+    };
+  }, [user]);
 
   // ── 로그아웃 함수 ─────────────────────────────────────────────
   // Header에 props로 내려줄 함수. 호출하면 Supabase 세션이 종료되고
   // onAuthStateChange가 SIGNED_OUT 이벤트를 발생시켜 user → null
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
+    const { error } = await supabase.auth.signOut({ scope: 'local' });
+    if (error) {
+      console.error('[App] signOut failed:', error);
+    }
+
+    clearSupabaseAuthStorage();
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    const hasResidualStorage = hasSupabaseAuthStorage();
+
+    setUser(null);
+    setProfile(null);
+    setShowProfileSetup(false);
+
+    if ((session || hasResidualStorage) && typeof window !== 'undefined') {
+      console.error('[App] signOut verification failed:', {
+        hasSession: Boolean(session),
+        hasResidualStorage,
+      });
+      window.location.replace(window.location.pathname);
+    }
   };
 
   // user가 undefined면 아직 인증 상태 로딩 중 → 빈 화면 방지용
@@ -121,6 +215,7 @@ const App: React.FC = () => {
               setProfile(newProfile);
               setShowProfileSetup(false);
             }}
+            onSignOut={handleSignOut}
           />
         )}
       </BrowserRouter>
