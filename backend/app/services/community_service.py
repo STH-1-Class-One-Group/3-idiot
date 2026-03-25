@@ -1,5 +1,6 @@
 import httpx
 from typing import Optional
+from jose import jwt
 from app.core.config import settings
 
 # Supabase PostgREST 기본 URL
@@ -52,7 +53,7 @@ async def get_posts(
 ) -> dict:
     """게시글 목록 조회 (author 프로필 JOIN, 페이지네이션)."""
     offset = (page - 1) * per_page
-    select = "id,post_number,title,content,category,views,created_at,updated_at,profiles(id,nickname,rank,avatar_url)"
+    select = "id,post_number,title,category,views,created_at,updated_at,profiles(id,nickname,rank,avatar_url)"
     params = {
         "select": select,
         "order": "post_number.desc",
@@ -63,27 +64,17 @@ async def get_posts(
     params.update(filters)
 
     async with httpx.AsyncClient() as client:
-        headers = _base_headers()
-        # 게시글 목록
+        headers = {**_base_headers(), "Prefer": "count=exact"}
         res = await client.get(
             f"{SUPABASE_REST}/community_posts",
-            headers={**headers, "Prefer": "return=representation"},
+            headers=headers,
             params=params,
         )
         res.raise_for_status()
         rows = res.json()
+        total = _extract_total_count(res.headers.get("content-range"), fallback=len(rows))
 
-        # 전체 건수
-        count_res = await client.head(
-            f"{SUPABASE_REST}/community_posts",
-            headers={**headers, "Prefer": "count=exact"},
-            params={"select": "id", **filters},
-        )
-        count_res.raise_for_status()
-        content_range = count_res.headers.get("content-range", "0-0/0")
-        total = int(content_range.split("/")[-1]) if "/" in content_range else len(rows)
-
-    posts = [_format_post(r) for r in rows]
+    posts = [_format_post_summary(r) for r in rows]
     return {"posts": posts, "total": total, "page": page, "per_page": per_page}
 
 
@@ -214,6 +205,11 @@ async def delete_comment(comment_id: str, token: str) -> None:
 
 async def _get_user_id(token: str) -> str:
     """Supabase JWT에서 사용자 ID 조회."""
+    claims = jwt.get_unverified_claims(token)
+    user_id = claims.get("sub")
+    if user_id:
+        return user_id
+
     async with httpx.AsyncClient() as client:
         res = await client.get(
             f"{settings.supabase_url}/auth/v1/user",
@@ -221,6 +217,35 @@ async def _get_user_id(token: str) -> str:
         )
         res.raise_for_status()
         return res.json()["id"]
+
+
+def _extract_total_count(content_range: Optional[str], fallback: int) -> int:
+    if not content_range or "/" not in content_range:
+        return fallback
+
+    total = content_range.split("/")[-1]
+    return int(total) if total.isdigit() else fallback
+
+
+def _format_post_summary(row: dict) -> dict:
+    """목록 화면에 필요한 최소 필드만 응답으로 변환."""
+    profile = row.get("profiles") or {}
+    return {
+        "id": row["id"],
+        "post_number": row.get("post_number", 0),
+        "title": row["title"],
+        "content": "",
+        "category": row["category"],
+        "views": row.get("views", 0),
+        "created_at": row["created_at"],
+        "updated_at": row["updated_at"],
+        "author": {
+            "id": profile.get("id", ""),
+            "nickname": profile.get("nickname", "알 수 없음"),
+            "rank": profile.get("rank"),
+            "avatar_url": profile.get("avatar_url"),
+        },
+    }
 
 
 def _format_post(row: dict) -> dict:
