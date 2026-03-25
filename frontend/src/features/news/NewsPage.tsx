@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { SearchBar } from '../../components/common/SearchBar';
 
 interface NewsItem {
@@ -9,6 +9,7 @@ interface NewsItem {
 }
 
 export const NewsPage: React.FC = () => {
+  const didInitRef = useRef(false);
   const [allNews, setAllNews] = useState<NewsItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -33,18 +34,35 @@ export const NewsPage: React.FC = () => {
   const hasSingleRowResults = !isLoading && currentNews.length > 0 && currentNews.length <= 4;
 
   useEffect(() => {
+    if (didInitRef.current) {
+      return;
+    }
+    didInitRef.current = true;
+
     const fetchNews = async () => {
       try {
         setIsLoading(true);
+        setAllNews([]);
         const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000';
-        const response = await fetch(`${apiUrl}/api/v1/news?limit=30&start=1`);
+        await Promise.all(
+          Array.from({ length: 30 }, (_, index) => index + 1).map(async (start) => {
+            const response = await fetch(`${apiUrl}/api/v1/news?limit=1&start=${start}`);
 
-        if (!response.ok) {
-          throw new Error('News fetch failed');
-        }
+            if (!response.ok) {
+              throw new Error(`News fetch failed at item ${start}`);
+            }
 
-        const data = await response.json();
-        setAllNews(data);
+            const data: NewsItem[] = await response.json();
+            if (data.length > 0) {
+              setAllNews((prev) => {
+                if (prev.some((item) => item.link === data[0].link)) {
+                  return prev;
+                }
+                return [...prev, data[0]];
+              });
+            }
+          })
+        );
       } catch (error) {
         console.error('[NewsPage] failed to load news:', error);
         setAllNews([]);
