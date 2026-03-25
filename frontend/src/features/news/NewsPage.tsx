@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { SearchBar } from '../../components/common/SearchBar';
 
 interface NewsItem {
   title: string;
@@ -8,38 +9,55 @@ interface NewsItem {
 }
 
 export const NewsPage: React.FC = () => {
-  const [newsList, setNewsList] = useState<NewsItem[]>([]);
+  const [allNews, setAllNews] = useState<NewsItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const itemsPerPage = 8;
-  const totalNewsCount = 30;
-  const totalPages = Math.ceil(totalNewsCount / itemsPerPage);
+  const filteredNews = allNews.filter((news) => {
+    const normalizedQuery = searchQuery.trim().toLowerCase();
+
+    if (!normalizedQuery) {
+      return true;
+    }
+
+    return (
+      news.title.toLowerCase().includes(normalizedQuery) ||
+      news.pubDate.toLowerCase().includes(normalizedQuery)
+    );
+  });
+  const totalPages = Math.max(1, Math.ceil(filteredNews.length / itemsPerPage));
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentNews = filteredNews.slice(startIndex, startIndex + itemsPerPage);
 
   useEffect(() => {
     const fetchNews = async () => {
       try {
         setIsLoading(true);
         const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000';
-        const start = (currentPage - 1) * itemsPerPage + 1;
-        const response = await fetch(`${apiUrl}/api/v1/news?limit=${itemsPerPage}&start=${start}`);
+        const response = await fetch(`${apiUrl}/api/v1/news?limit=30&start=1`);
 
         if (!response.ok) {
           throw new Error('News fetch failed');
         }
 
         const data = await response.json();
-        setNewsList(data);
+        setAllNews(data);
       } catch (error) {
-        console.error('[NewsPage] 뉴스 데이터 로드 실패:', error);
-        setNewsList([]);
+        console.error('[NewsPage] failed to load news:', error);
+        setAllNews([]);
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchNews();
-  }, [currentPage]);
+  }, []);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
 
   const handlePrevPage = () => {
     setCurrentPage((prev) => (prev > 1 ? prev - 1 : prev));
@@ -51,12 +69,38 @@ export const NewsPage: React.FC = () => {
 
   return (
     <div className="w-full">
+      <section className="max-w-3xl mx-auto mb-10">
+        <SearchBar
+          searchType="news"
+          placeholder="Search news by title or date"
+          localItems={allNews}
+          searchKeys={['title', 'pubDate']}
+          maxResults={6}
+          onQueryChange={setSearchQuery}
+          onSearchSelect={(item) => {
+            if (item?.title) {
+              setSearchQuery(item.title);
+            }
+          }}
+          renderItem={(item) => (
+            <div>
+              <div className="text-sm font-bold text-on-surface dark:text-white line-clamp-2">
+                {item.title}
+              </div>
+              <div className="mt-1 text-xs text-on-surface-variant dark:text-slate-400">
+                {item.pubDate}
+              </div>
+            </div>
+          )}
+        />
+      </section>
+
       <header className="mb-12 flex flex-col items-center justify-center space-y-4">
         <h1 className="text-3xl lg:text-4xl font-extrabold tracking-tighter text-on-surface dark:text-white">
-          국방 브리핑<span className="text-primary dark:text-blue-400">.뉴스</span>
+          News Briefing <span className="text-primary dark:text-blue-400">Archive</span>
         </h1>
         <p className="text-on-surface-variant dark:text-slate-400 font-medium text-sm">
-          실시간으로 업데이트된 주요 국방 및 K-방산 동향을 확인해보세요.
+          Filter the latest 30 defense news items by title or publication date.
         </p>
       </header>
 
@@ -64,20 +108,20 @@ export const NewsPage: React.FC = () => {
         <div className="mb-8 flex items-center justify-between">
           <h2 className="text-xl font-bold text-on-surface dark:text-white flex items-center gap-2">
             <span className="material-symbols-outlined text-primary dark:text-blue-400" translate="no">breaking_news</span>
-            최신 뉴스 속보
+            Latest News
           </h2>
           <span className="text-sm font-medium text-on-surface-variant dark:text-slate-400">
-            총 {totalNewsCount}건
+            {searchQuery.trim() ? `${filteredNews.length} matches` : `Total ${allNews.length}`}
           </span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 min-h-[400px]">
           {isLoading ? (
             <div className="col-span-full flex justify-center items-center">
-              <span className="text-on-surface-variant dark:text-slate-400 font-medium">뉴스를 불러오는 중입니다...</span>
+              <span className="text-on-surface-variant dark:text-slate-400 font-medium">Loading news...</span>
             </div>
-          ) : newsList.length > 0 ? (
-            newsList.map((news) => {
+          ) : currentNews.length > 0 ? (
+            currentNews.map((news) => {
               const proxyUrl =
                 news.thumbnail && news.thumbnail !== 'https://via.placeholder.com/300x200?text=No+Image'
                   ? `${process.env.REACT_APP_API_URL || 'http://localhost:8000'}/api/v1/news/image?url=${encodeURIComponent(news.thumbnail)}`
@@ -115,12 +159,12 @@ export const NewsPage: React.FC = () => {
             })
           ) : (
             <div className="col-span-full flex justify-center items-center text-on-surface-variant dark:text-slate-400 font-medium">
-              국방 뉴스를 찾을 수 없습니다.
+              No news matched your search.
             </div>
           )}
         </div>
 
-        {!isLoading && totalPages > 0 && (
+        {!isLoading && filteredNews.length > 0 ? (
           <div className="mt-12 flex justify-center items-center space-x-6">
             <button
               onClick={handlePrevPage}
@@ -140,7 +184,7 @@ export const NewsPage: React.FC = () => {
               <span className="material-symbols-outlined" translate="no">chevron_right</span>
             </button>
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );
