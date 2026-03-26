@@ -7,6 +7,7 @@ from app.api.v1.meal import router as meal_router
 from app.api.v1.news import router as news_router
 from app.api.v1.community import router as community_router
 from app.services import community_service
+from app.services.news_fetcher import close_news_http_client
 
 logging.basicConfig(
     level=logging.INFO,
@@ -45,3 +46,4 @@ def root():
 @app.on_event("shutdown")
 async def shutdown_event():
     await community_service.close_http_client()
+    await close_news_http_client()
