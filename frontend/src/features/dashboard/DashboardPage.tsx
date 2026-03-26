@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MealPopup, MealItem } from './components/MealPopup';
+import { fetchNewsBatch } from '../news/newsApi';
 
 interface MealData {
   dates: string;
@@ -90,7 +91,6 @@ export const DashboardPage: React.FC = () => {
       return;
     }
     didInitRef.current = true;
-
     const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
     const processMealData = async (data: MealData[]) => {
@@ -198,29 +198,27 @@ export const DashboardPage: React.FC = () => {
     const fetchNews = async () => {
       setIsNewsLoading(true);
       setNewsList([]);
+      const controller = new AbortController();
+      const timeoutId = window.setTimeout(() => controller.abort(), 8000);
 
       try {
-        await Promise.all(
-          Array.from({ length: 4 }, (_, index) => index + 1).map(async (start) => {
-            const response = await fetch(`${apiUrl}/api/v1/news?limit=1&start=${start}`);
-            if (!response.ok) {
-              throw new Error(`Failed to fetch news item ${start}`);
-            }
+        const response = await fetchNewsBatch(4, 1, {
+          signal: controller.signal,
+          forceRefresh: true,
+        });
+        if (!response.ok) {
+          throw new Error('Failed to fetch defense news');
+        }
 
-            const data: NewsItem[] = await response.json();
-            if (data.length > 0) {
-              setNewsList((prev) => {
-                if (prev.some((item) => item.link === data[0].link)) {
-                  return prev;
-                }
-                return [...prev, data[0]];
-              });
-            }
-          })
+        const data: NewsItem[] = await response.json();
+        const uniqueNews = data.filter(
+          (item, index, array) => item.link && array.findIndex((candidate) => candidate.link === item.link) === index
         );
+        setNewsList(uniqueNews);
       } catch (error) {
         console.error('[DashboardPage] news fetch failed:', error);
       } finally {
+        window.clearTimeout(timeoutId);
         setIsNewsLoading(false);
       }
     };
@@ -380,7 +378,9 @@ export const DashboardPage: React.FC = () => {
                       }}
                     />
                   </div>
-                  <h3 className="text-base font-bold text-on-surface dark:text-white leading-snug group-hover:text-primary dark:group-hover:text-blue-400 transition-colors line-clamp-2" dangerouslySetInnerHTML={{ __html: news.title }} />
+                  <h3 className="text-base font-bold text-on-surface dark:text-white leading-snug group-hover:text-primary dark:group-hover:text-blue-400 transition-colors line-clamp-2">
+                    {news.title}
+                  </h3>
                   <p className="text-xs text-on-surface-variant dark:text-slate-500 mt-2">{news.pubDate}</p>
                 </div>
               ))
