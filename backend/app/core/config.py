@@ -1,5 +1,12 @@
 # Environment variables loader
-from pydantic_settings import BaseSettings
+from pathlib import Path
+
+from pydantic import field_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+BACKEND_ENV_PATH = Path(__file__).resolve().parents[2] / ".env"
+
 
 class Settings(BaseSettings):
     database_url: str = ""
@@ -12,11 +19,28 @@ class Settings(BaseSettings):
     naver_client_id: str = ""
     naver_client_secret: str = ""
 
-    # Supabase (커뮤니티 API에서 PostgREST 직접 호출용)
+    # Supabase
     supabase_url: str = ""
     supabase_anon_key: str = ""
+    supabase_service_role_key: str = ""
 
-    class Config:
-        env_file = ".env"
+    model_config = SettingsConfigDict(
+        env_file=str(BACKEND_ENV_PATH),
+        extra="ignore",
+    )
+
+    @field_validator(
+        "database_url",
+        "supabase_url",
+        "supabase_anon_key",
+        "supabase_service_role_key",
+        mode="before",
+    )
+    @classmethod
+    def clean_string_value(cls, value: str) -> str:
+        if isinstance(value, str):
+            return value.strip()
+        return value
+
 
 settings = Settings()
