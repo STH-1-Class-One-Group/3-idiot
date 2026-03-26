@@ -75,6 +75,10 @@ export const NewsPage: React.FC = () => {
     setCurrentPage(1);
   }, [searchQuery]);
 
+  useEffect(() => {
+    setCurrentPage((prev) => Math.min(prev, totalPages));
+  }, [totalPages]);
+
   const handlePrevPage = () => {
     setCurrentPage((prev) => (prev > 1 ? prev - 1 : prev));
   };
@@ -190,7 +194,7 @@ export const NewsPage: React.FC = () => {
           </div>
         )}
 
-        {!isLoading && filteredNews.length > 0 ? (
+        {filteredNews.length > 0 ? (
           <div className="mt-12 flex justify-center items-center space-x-6">
             <button
               onClick={handlePrevPage}
