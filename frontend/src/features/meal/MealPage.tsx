@@ -15,10 +15,34 @@ interface DayMealData {
   title: string;       // "어제", "오늘", "내일"
   shortDate: string;   // "05. 19"
   isToday: boolean;
+  apiDate: string;
+  dayOffset: number;
   breakfast: ParsedMeal;
   lunch:     ParsedMeal;
   dinner:    ParsedMeal;
   dailyTotal: number;
+}
+
+interface MealApiRow {
+  dates: string;
+  brst?: string;
+  brst_cal?: string;
+  lnch?: string;
+  lunc?: string;
+  lnch_cal?: string;
+  lunc_cal?: string;
+  dnr?: string;
+  dinr?: string;
+  dnr_cal?: string;
+  dinr_cal?: string;
+  sum_cal?: string;
+}
+
+interface MealApiResponse {
+  success: boolean;
+  date: string;
+  data: MealApiRow[];
+  is_fallback?: boolean;
 }
 
 const getDateInfo = (baseDate: Date, offset: number) => {
@@ -100,54 +124,112 @@ const processMealsAPI = (data: any[], _displayString: string): { b: ParsedMeal, 
   };
 };
 
+const getStartOfDay = (date: Date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+const getDayOffset = (targetDateString: string, referenceDate: Date) => {
+  const [year, month, day] = targetDateString.split('-').map(Number);
+  const target = new Date(year, (month || 1) - 1, day || 1);
+  const startTarget = getStartOfDay(target).getTime();
+  const startReference = getStartOfDay(referenceDate).getTime();
+  return Math.round((startTarget - startReference) / (1000 * 60 * 60 * 24));
+};
+
+const getRelativeDayLabel = (dayOffset: number) => {
+  if (dayOffset === 0) return '오늘';
+  if (dayOffset === 1) return '내일';
+  if (dayOffset === -1) return '어제';
+  if (dayOffset > 1) return `${dayOffset}일 후`;
+  return `${Math.abs(dayOffset)}일 전`;
+};
+
+const createDayMealData = (
+  apiDate: string,
+  parsed: { b: ParsedMeal; l: ParsedMeal; d: ParsedMeal; dailyTotal: number },
+  referenceDate: Date
+): DayMealData => {
+  const [year, month, day] = apiDate.split('-').map(Number);
+  const date = new Date(year, (month || 1) - 1, day || 1);
+  const monthStr = String(date.getMonth() + 1).padStart(2, '0');
+  const dayStr = String(date.getDate()).padStart(2, '0');
+  const dayOffset = getDayOffset(apiDate, referenceDate);
+
+  return {
+    title: getRelativeDayLabel(dayOffset),
+    shortDate: `${monthStr}. ${dayStr}`,
+    isToday: dayOffset === 0,
+    apiDate,
+    dayOffset,
+    breakfast: parsed.b,
+    lunch: parsed.l,
+    dinner: parsed.d,
+    dailyTotal: parsed.dailyTotal,
+  };
+};
+
+const getDatePrefix = (value: string) => {
+  const matched = value.match(/\d{4}-\d{2}-\d{2}/);
+  return matched ? matched[0] : '';
+};
+
 export const MealPage: React.FC = () => {
   const [baseDate, setBaseDate] = useState<Date>(new Date());
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [mealDays, setMealDays] = useState<DayMealData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<DayMealData[]>([]);
+  const [isSearchLoading, setIsSearchLoading] = useState(false);
+  const [searchFeedback, setSearchFeedback] = useState('');
 
   // 현재 기준 날짜(Header)
   const currentInfo = getDateInfo(baseDate, 0);
   const headerDateStr = `${baseDate.getFullYear()}. ${currentInfo.shortDate}`; 
+  const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+  const normalizedSearchQuery = searchQuery.trim();
+
+  const fetchMealDayData = async (dateString: string, referenceDate: Date) => {
+    const info = getDateInfo(referenceDate, getDayOffset(dateString, referenceDate));
+    let finalData: MealApiRow[] = [];
+    let isFallback = false;
+
+    try {
+      const res = await fetch(`${apiUrl}/api/v1/meals/${dateString}`);
+      if (!res.ok) throw new Error('API Fail');
+      const result: MealApiResponse = await res.json();
+      if (!result.success || !result.data || result.data.length === 0) {
+        throw new Error('No Data');
+      }
+      finalData = result.data;
+      isFallback = Boolean(result.is_fallback);
+    } catch (err) {
+      console.warn(`[MealPage] 날짜 ${dateString} 식단 로드 실패, Fallback 데이터 사용`);
+      finalData = getFallbackData(info.displayString) as MealApiRow[];
+      isFallback = true;
+    }
+
+    const parsed = processMealsAPI(finalData, info.displayString);
+
+    return {
+      dayData: createDayMealData(dateString, parsed, referenceDate),
+      isFallback,
+    };
+  };
 
   useEffect(() => {
     const fetchAllMeals = async () => {
       setIsLoading(true);
-      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000';
       
       const offsets = [-1, 0, 1]; // 어제, 오늘, 내일
       
       const promises = offsets.map(async (offset) => {
         const info = getDateInfo(baseDate, offset);
-        let finalData: any[] = [];
-        try {
-          const res = await fetch(`${apiUrl}/api/v1/meals/${info.apiString}`);
-          if (!res.ok) throw new Error('API Fail');
-          const result = await res.json();
-          if (!result.success || !result.data || result.data.length === 0) {
-            throw new Error('No Data');
-          }
-          finalData = result.data;
-        } catch (err) {
-          console.warn(`[MealPage] 날짜 ${info.apiString} 식단 로드 실패, Fallback 데이터 사용`);
-          finalData = getFallbackData(info.displayString);
-        }
-
-        const parsed = processMealsAPI(finalData, info.displayString);
-        
-        let title = '';
-        if (offset === -1) title = '어제';
-        else if (offset === 0) title = '오늘';
-        else if (offset === 1) title = '내일';
-
+        const { dayData } = await fetchMealDayData(info.apiString, baseDate);
         return {
-          title,
+          ...dayData,
+          title: offset === -1 ? '어제' : offset === 0 ? '오늘' : '내일',
           shortDate: info.shortDate,
-          isToday: offset === 0, // 0일때 하이라이트 되도록 처리
-          breakfast: parsed.b,
-          lunch: parsed.l,
-          dinner: parsed.d,
-          dailyTotal: parsed.dailyTotal
+          isToday: offset === 0,
+          dayOffset: offset,
         } as DayMealData;
       });
 
@@ -158,6 +240,111 @@ export const MealPage: React.FC = () => {
 
     fetchAllMeals();
   }, [baseDate.getTime()]);
+
+  useEffect(() => {
+    const trimmedQuery = searchQuery.trim().toLowerCase();
+
+    if (!trimmedQuery) {
+      setSearchResults([]);
+      setSearchFeedback('');
+      setIsSearchLoading(false);
+      return;
+    }
+
+    let isActive = true;
+
+    const searchMeals = async () => {
+      setIsSearchLoading(true);
+      setSearchFeedback('');
+
+      try {
+        const response = await fetch(`${apiUrl}/api/v1/meals`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch all meals');
+        }
+
+        const result: MealApiResponse = await response.json();
+        const groupedMeals = new Map<string, MealApiRow[]>();
+
+        result.data.forEach((item) => {
+          const datePrefix = getDatePrefix(item.dates);
+          if (!datePrefix) {
+            return;
+          }
+
+          const existingItems = groupedMeals.get(datePrefix) || [];
+          existingItems.push(item);
+          groupedMeals.set(datePrefix, existingItems);
+        });
+
+        const today = new Date();
+        const matches = Array.from(groupedMeals.entries())
+          .map(([dateString, rows]) => {
+            const parsed = processMealsAPI(rows, dateString);
+            const dayData = createDayMealData(dateString, parsed, today);
+            const searchableText = [
+              ...parsed.b.items.map((item) => item.name),
+              ...parsed.l.items.map((item) => item.name),
+              ...parsed.d.items.map((item) => item.name),
+            ]
+              .join(' ')
+              .toLowerCase();
+
+            return {
+              dayData,
+              searchableText,
+            };
+          })
+          .filter(({ searchableText }) => searchableText.includes(trimmedQuery))
+          .sort((left, right) => {
+            const leftDistance = Math.abs(left.dayData.dayOffset);
+            const rightDistance = Math.abs(right.dayData.dayOffset);
+
+            if (leftDistance !== rightDistance) {
+              return leftDistance - rightDistance;
+            }
+
+            if (left.dayData.dayOffset >= 0 && right.dayData.dayOffset < 0) {
+              return -1;
+            }
+
+            if (left.dayData.dayOffset < 0 && right.dayData.dayOffset >= 0) {
+              return 1;
+            }
+
+            return left.dayData.dayOffset - right.dayData.dayOffset;
+          })
+          .map(({ dayData }) => dayData);
+
+        if (!isActive) {
+          return;
+        }
+
+        setSearchResults(matches);
+        if (matches.length === 0) {
+          setSearchFeedback('검색한 식단과 일치하는 날짜가 없습니다.');
+        }
+      } catch (error) {
+        if (!isActive) {
+          return;
+        }
+
+        console.error('[MealPage] failed to search meals:', error);
+        setSearchResults([]);
+        setSearchFeedback('식단 검색 중 오류가 발생했습니다.');
+      } finally {
+        if (isActive) {
+          setIsSearchLoading(false);
+        }
+      }
+    };
+
+    void searchMeals();
+
+    return () => {
+      isActive = false;
+    };
+  }, [apiUrl, searchQuery]);
 
   const renderMealBox = (mealCode: 'brst' | 'lnch' | 'dnr', parsed: ParsedMeal, isToday: boolean) => {
     let icon = '';
@@ -215,9 +402,20 @@ export const MealPage: React.FC = () => {
           <input 
             type="text" 
             className="w-full bg-surface-container-low dark:bg-slate-800 border-none rounded-full py-3.5 pl-12 pr-4 text-sm focus:ring-2 focus:ring-primary/20 placeholder:text-on-surface-variant/60 dark:placeholder:text-slate-500 text-on-surface dark:text-white" 
-            placeholder="식단, 재료 또는 영양 정보를 검색하세요" 
+            placeholder="식단, 재료 또는 영양 정보를 검색하세요"
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
           />
         </div>
+        {normalizedSearchQuery ? (
+          <div className="mt-3 px-2 text-sm text-on-surface-variant dark:text-slate-400">
+            {isSearchLoading
+              ? '식단 검색 중...'
+              : searchResults.length > 0
+                ? `${searchResults.length}개의 일정 식단을 찾았습니다.`
+                : searchFeedback}
+          </div>
+        ) : null}
       </div>
 
       {/* Date Navigation Header */}
@@ -251,7 +449,48 @@ export const MealPage: React.FC = () => {
       </header>
 
       {/* Meal Grid Layout */}
-      {isLoading ? (
+      {normalizedSearchQuery ? (
+        isSearchLoading ? (
+          <div className="flex justify-center items-center h-48">
+            <span className="text-on-surface-variant dark:text-slate-400">검색 결과를 불러오는 중입니다...</span>
+          </div>
+        ) : searchResults.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+            {searchResults.map((dayData) => (
+              <section
+                key={dayData.apiDate}
+                className={`space-y-6 relative transition-opacity ${!dayData.isToday ? 'opacity-90 hover:opacity-100' : ''}`}
+              >
+                {dayData.isToday && (
+                  <div className="absolute -inset-4 border-2 border-primary/20 dark:border-blue-400/20 rounded-3xl pointer-events-none hidden md:block"></div>
+                )}
+
+                <div className="text-center mb-4 relative">
+                  {dayData.isToday && (
+                    <span className="bg-primary dark:bg-blue-600 text-white text-[10px] px-3 py-1 rounded-full absolute -top-8 left-1/2 -translate-x-1/2 font-bold uppercase tracking-tighter">Current Day</span>
+                  )}
+                  <h2 className={`text-xl font-extrabold ${dayData.isToday ? 'text-primary dark:text-blue-400' : 'text-on-surface-variant dark:text-slate-300'}`}>
+                    {dayData.title} ({dayData.shortDate})
+                  </h2>
+                  <div className="mt-1 font-bold text-sm text-on-surface-variant dark:text-slate-400">
+                    총 <span className="text-primary dark:text-blue-400">{dayData.dailyTotal.toLocaleString()}</span> kcal
+                  </div>
+                </div>
+
+                {renderMealBox('brst', dayData.breakfast, dayData.isToday)}
+                {renderMealBox('lnch', dayData.lunch, dayData.isToday)}
+                {renderMealBox('dnr', dayData.dinner, dayData.isToday)}
+              </section>
+            ))}
+          </div>
+        ) : (
+          <div className="flex justify-center items-center h-48">
+            <span className="text-on-surface-variant dark:text-slate-400">
+              {searchFeedback || '검색 결과가 없습니다.'}
+            </span>
+          </div>
+        )
+      ) : isLoading ? (
         <div className="flex justify-center items-center h-48">
           <span className="text-on-surface-variant dark:text-slate-400">식단 정보를 불러오는 중입니다...</span>
         </div>
