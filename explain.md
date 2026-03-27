@@ -88,6 +88,4 @@ true
 
 참고로 네이버 api로 받아오는 값은 title, link, pubDate, thumbnail이고, defense_news 테이블의 속성은 id(고유 uuid), title(text, 네이버 api의 title과 대응), link(text, 네이버 api의 link와 대응), published_at(timestamp, 네이버 api의 pubDate와 대응), thumbnail_url(text, 네이버 api의 thumbnail과 대응) 이야, 이 속성들에 맞추어서 데이터를 저장해주었으면 해, 구조의 형태는 GEMINI.md 문서의 내용을 참고해주었으면 해
 
-16-2. 지금 변경 된 파일들 중에서 보안상으로 위험할 수 있는 코드가 있다면 그것들 좀 XSS 공격이나 SQL 인잭션 공격 등의 보안 공격을 막기 위해 보안상으로 안전하게 변경해주고, 만약에 보안상으로 안전하다면 organize.md로 만들어서 어떻게 변하였는지 git 컨벤션까지 포함해서 정리해줘, 구조는 GEMINI.md 문서의 내용을 참고해주었으면 해
-
-17. profiles 테이블의 id(uuid)를 통해 bookmarks_news에서 user_id를 받고, defense_news 테이블에서 id(uuid)를 또 받아서 bookmarks_news의 user_id에 넣으려고 하거든? 그리고 유저가 특정 뉴스의 북마크를 지정을 하게 되면 bookmarks_news 테이블에 해당 유저와 해당 뉴스의 id를 불러오는 방식으로 구현하려고 해, 구조의 형태는 GEMINI.md 문서의 내용을 참고해주었으면 해
+17. profiles 테이블의 id(uuid)를 통해 bookmarks_news에서 user_id를 받고, defense_news 테이블에서 id(uuid)를 또 받아서 bookmarks_news의 user_id에 넣으려고 하거든? 그리고 유저가 특정 뉴스의 북마크를 지정을 하게 되면 bookmarks_news 테이블에 해당 유저와 해당 뉴스의 id를 불러오는 방식으로 구현하려고 해, 구조의 형태는 GEMINI.md 문서의 내용을 참고해주었으면 해, 그리고 북마크 디자인 부분(뉴스 별 북마크 및 검색창 옆 북마크 버튼)은 stitch/news의 code.html, screen.png를 참고했으면 해
