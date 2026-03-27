@@ -73,7 +73,15 @@ const shouldRequireProfileSetup = (currentProfile: Profile | null) => {
     return true;
   }
 
-  return !currentProfile.profile_completed;
+  if (!currentProfile.profile_completed || !currentProfile.user_type) {
+    return true;
+  }
+
+  if (currentProfile.user_type === 'active_service') {
+    return !currentProfile.enlistment_date || !currentProfile.service_track;
+  }
+
+  return false;
 };
 
 const App: React.FC = () => {

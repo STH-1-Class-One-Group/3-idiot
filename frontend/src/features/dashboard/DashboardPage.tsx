@@ -74,7 +74,11 @@ interface DashboardPageProps {
 export const DashboardPage: React.FC<DashboardPageProps> = ({ profile }) => {
   const navigate = useNavigate();
   const didInitRef = useRef(false);
-  const serviceTimeline = calculateServiceTimeline(profile?.enlistment_date);
+  const serviceTimeline = calculateServiceTimeline(
+    profile?.user_type,
+    profile?.service_track,
+    profile?.enlistment_date
+  );
 
   const [mealInfo, setMealInfo] = useState(DEFAULT_MEAL_INFO);
   const [newsList, setNewsList] = useState<NewsItem[]>([]);
@@ -272,6 +276,19 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ profile }) => {
           </div>
 
           <div className="space-y-6">
+            <div className="rounded-2xl border border-outline-variant/15 bg-surface-container-low/70 px-4 py-3 dark:border-slate-800 dark:bg-slate-800/80">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-on-surface-variant dark:text-slate-400">
+                Service Track
+              </p>
+              <div className="mt-1 flex items-end justify-between gap-3">
+                <p className="text-sm font-semibold text-on-surface dark:text-white">
+                  {serviceTimeline.serviceLabel}
+                </p>
+                <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-bold text-primary dark:bg-blue-500/10 dark:text-blue-300">
+                  {serviceTimeline.serviceDurationLabel}
+                </span>
+              </div>
+            </div>
             <div className="flex flex-col md:flex-row gap-4">
               <div className="flex-1 space-y-2">
                 <label className="text-xs font-medium text-on-surface-variant dark:text-slate-400 ml-1">Enlistment</label>

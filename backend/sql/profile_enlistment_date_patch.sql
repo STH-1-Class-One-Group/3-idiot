@@ -10,6 +10,16 @@ alter table public.profiles
 comment on column public.profiles.enlistment_date is '입대일 (군 복무 중인 사용자용, 선택)';
 
 alter table public.profiles
+  add column if not exists user_type text;
+
+comment on column public.profiles.user_type is '회원 유형 (civilian 또는 active_service)';
+
+alter table public.profiles
+  add column if not exists service_track text;
+
+comment on column public.profiles.service_track is '현역 군인의 복무 유형';
+
+alter table public.profiles
   add column if not exists profile_completed boolean not null default false;
 
 comment on column public.profiles.profile_completed is '프로필 설정 완료 여부';

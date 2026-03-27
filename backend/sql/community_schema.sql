@@ -9,9 +9,19 @@
 create table if not exists public.profiles (
   id          uuid primary key references auth.users(id) on delete cascade,
   nickname    text not null unique,
+  user_type   text check (user_type in ('civilian', 'active_service')),
   rank        text,                        -- 계급 (선택)
   unit        text,                        -- 소속부대 (선택)
   enlistment_date date,                    -- 입대일 (선택)
+  service_track text check (
+    service_track in (
+      'army_active',
+      'air_force_active',
+      'social_service',
+      'industrial_service_active',
+      'industrial_service_supplementary'
+    )
+  ),
   profile_completed boolean not null default false, -- 프로필 설정 완료 여부
   avatar_url  text,                        -- Supabase Storage 프로필 이미지 경로
   created_at  timestamptz not null default now(),

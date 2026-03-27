@@ -2,13 +2,19 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { User } from '@supabase/supabase-js';
 import { useNavigate } from 'react-router-dom';
 import { ProfileAvatar } from '../../components/common/ProfileAvatar';
-import { calculateServiceTimeline } from '../../utils/serviceDates';
+import {
+  calculateServiceTimeline,
+  getUserTypeLabel,
+  isActiveServiceUser,
+} from '../../utils/serviceDates';
 import { Profile, ProfileFormValues } from './types';
 import {
   getProviderLabel,
   getTodayInputValue,
   isNicknameAvailable,
   PROFILE_RANKS,
+  PROFILE_SERVICE_TRACK_OPTIONS,
+  PROFILE_USER_TYPE_OPTIONS,
   saveProfile,
 } from './profileFormUtils';
 
@@ -45,11 +51,15 @@ export const MyPage: React.FC<MyPageProps> = ({
   const navigate = useNavigate();
   const [form, setForm] = useState<ProfileFormValues>({
     nickname: profile?.nickname ?? '',
+    userType: profile?.user_type ?? '',
     rank: profile?.rank ?? '',
     unit: profile?.unit ?? '',
     enlistmentDate: profile?.enlistment_date ?? '',
+    serviceTrack: profile?.service_track ?? '',
   });
   const [nicknameError, setNicknameError] = useState('');
+  const [userTypeError, setUserTypeError] = useState('');
+  const [serviceTrackError, setServiceTrackError] = useState('');
   const [enlistmentDateError, setEnlistmentDateError] = useState('');
   const [saveError, setSaveError] = useState('');
   const [saveSuccess, setSaveSuccess] = useState('');
@@ -59,7 +69,8 @@ export const MyPage: React.FC<MyPageProps> = ({
   const todayInputValue = getTodayInputValue();
   const providerLabel = getProviderLabel(user?.app_metadata?.provider);
   const displayName = profile?.nickname || (user?.user_metadata?.full_name as string) || user?.email || '사용자';
-  const serviceTimeline = calculateServiceTimeline(profile?.enlistment_date ?? form.enlistmentDate);
+  const isActiveService = isActiveServiceUser(form.userType);
+  const serviceTimeline = calculateServiceTimeline(form.userType, form.serviceTrack, form.enlistmentDate);
 
   useEffect(() => {
     if (!user && !isProfileLoading) {
@@ -70,11 +81,15 @@ export const MyPage: React.FC<MyPageProps> = ({
   useEffect(() => {
     setForm({
       nickname: profile?.nickname ?? '',
+      userType: profile?.user_type ?? '',
       rank: profile?.rank ?? '',
       unit: profile?.unit ?? '',
       enlistmentDate: profile?.enlistment_date ?? '',
+      serviceTrack: profile?.service_track ?? '',
     });
     setNicknameError('');
+    setUserTypeError('');
+    setServiceTrackError('');
     setEnlistmentDateError('');
     setSaveError('');
     setSaveSuccess('');
@@ -84,10 +99,11 @@ export const MyPage: React.FC<MyPageProps> = ({
     () => [
       { label: '로그인 계정', value: user?.email ?? '이메일 정보 없음' },
       { label: '로그인 제공자', value: providerLabel },
+      { label: '회원 유형', value: getUserTypeLabel(form.userType) },
       { label: '가입일', value: formatDateLabel(user?.created_at) },
       { label: '프로필 상태', value: profile?.profile_completed ? '설정 완료' : '설정 필요' },
     ],
-    [profile?.profile_completed, providerLabel, user?.created_at, user?.email]
+    [form.userType, profile?.profile_completed, providerLabel, user?.created_at, user?.email]
   );
 
   const handleFieldChange = (key: keyof ProfileFormValues, value: string) => {
@@ -98,8 +114,29 @@ export const MyPage: React.FC<MyPageProps> = ({
     if (key === 'nickname') {
       setNicknameError('');
     }
-
+    if (key === 'userType') {
+      setUserTypeError('');
+    }
+    if (key === 'serviceTrack') {
+      setServiceTrackError('');
+    }
     if (key === 'enlistmentDate') {
+      setEnlistmentDateError('');
+    }
+  };
+
+  const handleUserTypeChange = (nextUserType: string) => {
+    setForm((current) => ({
+      ...current,
+      userType: nextUserType,
+      rank: nextUserType === 'active_service' ? current.rank : '',
+      unit: nextUserType === 'active_service' ? current.unit : '',
+      enlistmentDate: nextUserType === 'active_service' ? current.enlistmentDate : '',
+      serviceTrack: nextUserType === 'active_service' ? current.serviceTrack : '',
+    }));
+    setUserTypeError('');
+    if (nextUserType !== 'active_service') {
+      setServiceTrackError('');
       setEnlistmentDateError('');
     }
   };
@@ -121,11 +158,15 @@ export const MyPage: React.FC<MyPageProps> = ({
   const handleReset = () => {
     setForm({
       nickname: profile?.nickname ?? '',
+      userType: profile?.user_type ?? '',
       rank: profile?.rank ?? '',
       unit: profile?.unit ?? '',
       enlistmentDate: profile?.enlistment_date ?? '',
+      serviceTrack: profile?.service_track ?? '',
     });
     setNicknameError('');
+    setUserTypeError('');
+    setServiceTrackError('');
     setEnlistmentDateError('');
     setSaveError('');
     setSaveSuccess('');
@@ -141,6 +182,21 @@ export const MyPage: React.FC<MyPageProps> = ({
 
     if (!form.nickname.trim()) {
       setNicknameError('닉네임을 입력해주세요.');
+      return;
+    }
+
+    if (!form.userType) {
+      setUserTypeError('회원 유형을 선택해주세요.');
+      return;
+    }
+
+    if (isActiveService && !form.serviceTrack) {
+      setServiceTrackError('복무 유형을 선택해주세요.');
+      return;
+    }
+
+    if (isActiveService && !form.enlistmentDate) {
+      setEnlistmentDateError('입대일을 입력해주세요.');
       return;
     }
 
@@ -164,7 +220,17 @@ export const MyPage: React.FC<MyPageProps> = ({
         return;
       }
 
-      const { data, error } = await saveProfile(user.id, form);
+      const payload = isActiveService
+        ? form
+        : {
+            ...form,
+            rank: '',
+            unit: '',
+            enlistmentDate: '',
+            serviceTrack: '',
+          };
+
+      const { data, error } = await saveProfile(user.id, payload);
 
       if (error) {
         if (error.code === '23505') {
@@ -209,16 +275,24 @@ export const MyPage: React.FC<MyPageProps> = ({
             </span>
             <div className="space-y-3">
               <h1 className="text-4xl font-black tracking-tight text-slate-900 dark:text-white md:text-5xl">
-                개인 프로필과
+                내 계정과
                 <br />
-                복무 기준 정보를 관리하세요.
+                사용자 유형을 관리하세요.
               </h1>
               <p className="max-w-2xl text-sm leading-7 text-slate-600 dark:text-slate-300 md:text-base">
-                닉네임, 계급, 소속부대, 입대일을 수정하면 커뮤니티 표시 정보와 군 복무일 계산 카드가 즉시 갱신됩니다.
+                일반인과 현역 군인을 구분해 프로필을 관리합니다. 현역 군인으로 설정하면 복무 유형과 입대일을 기반으로 전역일 계산이 자동 반영됩니다.
               </p>
             </div>
 
             <div className="flex flex-wrap gap-3">
+              <div className="rounded-2xl border border-slate-200/70 bg-slate-50/90 px-4 py-3 dark:border-slate-800 dark:bg-slate-950/60">
+                <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+                  User Type
+                </div>
+                <div className="mt-1 text-xl font-bold text-slate-900 dark:text-white">
+                  {getUserTypeLabel(form.userType)}
+                </div>
+              </div>
               <div className="rounded-2xl border border-slate-200/70 bg-slate-50/90 px-4 py-3 dark:border-slate-800 dark:bg-slate-950/60">
                 <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
                   D-Day
@@ -242,7 +316,7 @@ export const MyPage: React.FC<MyPageProps> = ({
             <div className="flex items-center gap-4">
               <ProfileAvatar
                 nickname={displayName}
-                rank={profile?.rank ?? form.rank}
+                rank={isActiveService ? form.rank : null}
                 avatar_url={profile?.avatar_url}
                 containerClassName="h-20 w-20 overflow-hidden rounded-[24px] ring-4 ring-white dark:ring-slate-900"
                 fallbackClassName="bg-gradient-to-br from-sky-600 via-blue-600 to-cyan-500 text-white text-2xl font-black"
@@ -255,8 +329,9 @@ export const MyPage: React.FC<MyPageProps> = ({
                   {displayName}
                 </h2>
                 <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
-                  {profile?.rank || form.rank || '계급 미설정'}
-                  {(profile?.unit || form.unit) ? ` · ${profile?.unit || form.unit}` : ''}
+                  {getUserTypeLabel(form.userType)}
+                  {isActiveService && form.rank ? ` · ${form.rank}` : ''}
+                  {isActiveService && form.unit ? ` · ${form.unit}` : ''}
                 </p>
               </div>
             </div>
@@ -287,6 +362,25 @@ export const MyPage: React.FC<MyPageProps> = ({
               Service Timeline
             </p>
             <div className="mt-5 space-y-4">
+              <div className="rounded-2xl border border-slate-200/70 bg-slate-50/80 px-4 py-4 dark:border-slate-800 dark:bg-slate-950/60">
+                <div className="text-xs uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+                  회원 유형
+                </div>
+                <div className="mt-2 text-lg font-bold text-slate-900 dark:text-white">
+                  {getUserTypeLabel(form.userType)}
+                </div>
+              </div>
+              <div className="rounded-2xl border border-slate-200/70 bg-slate-50/80 px-4 py-4 dark:border-slate-800 dark:bg-slate-950/60">
+                <div className="text-xs uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+                  복무 유형
+                </div>
+                <div className="mt-2 text-lg font-bold text-slate-900 dark:text-white">
+                  {serviceTimeline.serviceLabel}
+                </div>
+                <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                  복무기간 {serviceTimeline.serviceDurationLabel}
+                </p>
+              </div>
               <div className="rounded-2xl border border-slate-200/70 bg-slate-50/80 px-4 py-4 dark:border-slate-800 dark:bg-slate-950/60">
                 <div className="text-xs uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
                   입대일
@@ -342,7 +436,7 @@ export const MyPage: React.FC<MyPageProps> = ({
                   개인정보 수정
                 </h2>
                 <p className="mt-2 text-sm leading-7 text-slate-600 dark:text-slate-300">
-                  커뮤니티 표시 정보와 복무 계산에 쓰이는 값을 여기서 직접 수정할 수 있습니다.
+                  일반인은 기본 계정 정보만 유지하고, 현역 군인은 복무 계산에 필요한 군 관련 정보를 추가로 수정할 수 있습니다.
                 </p>
               </div>
               <button
@@ -356,6 +450,34 @@ export const MyPage: React.FC<MyPageProps> = ({
           </div>
 
           <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                회원 유형 <span className="text-red-500">*</span>
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {PROFILE_USER_TYPE_OPTIONS.map((option) => {
+                  const isSelected = form.userType === option.value;
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => handleUserTypeChange(option.value)}
+                      className={`rounded-2xl border px-4 py-3 text-sm font-semibold transition-colors ${
+                        isSelected
+                          ? 'border-sky-400 bg-sky-50 text-sky-700 dark:border-sky-500 dark:bg-sky-500/10 dark:text-sky-200'
+                          : 'border-slate-200 bg-slate-50/80 text-slate-700 dark:border-slate-700 dark:bg-slate-950/60 dark:text-slate-200'
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  );
+                })}
+              </div>
+              {userTypeError && (
+                <p className="text-xs text-red-500">{userTypeError}</p>
+              )}
+            </div>
+
             <div className="grid gap-6 md:grid-cols-2">
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-slate-700 dark:text-slate-200">
@@ -389,55 +511,82 @@ export const MyPage: React.FC<MyPageProps> = ({
                   className="w-full rounded-2xl border border-slate-200 bg-slate-100 px-4 py-3 text-sm text-slate-500 outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400"
                 />
               </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-700 dark:text-slate-200">
-                  계급
-                </label>
-                <select
-                  value={form.rank}
-                  onChange={(event) => handleFieldChange('rank', event.target.value)}
-                  className="w-full rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-sm text-slate-900 outline-none transition-colors focus:border-sky-400 focus:bg-white dark:border-slate-700 dark:bg-slate-950/60 dark:text-white dark:focus:border-sky-500"
-                >
-                  <option value="">선택 안함</option>
-                  {PROFILE_RANKS.map((rankOption) => (
-                    <option key={rankOption} value={rankOption}>
-                      {rankOption}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-700 dark:text-slate-200">
-                  입대일
-                </label>
-                <input
-                  type="date"
-                  value={form.enlistmentDate}
-                  max={todayInputValue}
-                  onChange={(event) => handleFieldChange('enlistmentDate', event.target.value)}
-                  className="w-full rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-sm text-slate-900 outline-none transition-colors focus:border-sky-400 focus:bg-white dark:border-slate-700 dark:bg-slate-950/60 dark:text-white dark:focus:border-sky-500"
-                />
-                {enlistmentDateError && (
-                  <p className="text-xs text-red-500">{enlistmentDateError}</p>
-                )}
-              </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-slate-700 dark:text-slate-200">
-                소속부대
-              </label>
-              <input
-                type="text"
-                value={form.unit}
-                onChange={(event) => handleFieldChange('unit', event.target.value)}
-                maxLength={50}
-                placeholder="예: 육군 제00사단"
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-sm text-slate-900 outline-none transition-colors focus:border-sky-400 focus:bg-white dark:border-slate-700 dark:bg-slate-950/60 dark:text-white dark:focus:border-sky-500"
-              />
-            </div>
+            {isActiveService && (
+              <>
+                <div className="grid gap-6 md:grid-cols-2">
+                  <div className="space-y-2 md:col-span-2">
+                    <label className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                      복무 유형 <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      value={form.serviceTrack}
+                      onChange={(event) => handleFieldChange('serviceTrack', event.target.value)}
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-sm text-slate-900 outline-none transition-colors focus:border-sky-400 focus:bg-white dark:border-slate-700 dark:bg-slate-950/60 dark:text-white dark:focus:border-sky-500"
+                    >
+                      <option value="">선택하세요</option>
+                      {PROFILE_SERVICE_TRACK_OPTIONS.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label} · {option.durationLabel}
+                        </option>
+                      ))}
+                    </select>
+                    {serviceTrackError && (
+                      <p className="text-xs text-red-500">{serviceTrackError}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                      계급
+                    </label>
+                    <select
+                      value={form.rank}
+                      onChange={(event) => handleFieldChange('rank', event.target.value)}
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-sm text-slate-900 outline-none transition-colors focus:border-sky-400 focus:bg-white dark:border-slate-700 dark:bg-slate-950/60 dark:text-white dark:focus:border-sky-500"
+                    >
+                      <option value="">선택 안함</option>
+                      {PROFILE_RANKS.map((rankOption) => (
+                        <option key={rankOption} value={rankOption}>
+                          {rankOption}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                      입대일 <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      value={form.enlistmentDate}
+                      max={todayInputValue}
+                      onChange={(event) => handleFieldChange('enlistmentDate', event.target.value)}
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-sm text-slate-900 outline-none transition-colors focus:border-sky-400 focus:bg-white dark:border-slate-700 dark:bg-slate-950/60 dark:text-white dark:focus:border-sky-500"
+                    />
+                    {enlistmentDateError && (
+                      <p className="text-xs text-red-500">{enlistmentDateError}</p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                    소속부대
+                  </label>
+                  <input
+                    type="text"
+                    value={form.unit}
+                    onChange={(event) => handleFieldChange('unit', event.target.value)}
+                    maxLength={50}
+                    placeholder="예: 육군 제00사단"
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-sm text-slate-900 outline-none transition-colors focus:border-sky-400 focus:bg-white dark:border-slate-700 dark:bg-slate-950/60 dark:text-white dark:focus:border-sky-500"
+                  />
+                </div>
+              </>
+            )}
 
             {(saveError || saveSuccess) && (
               <div
@@ -453,11 +602,18 @@ export const MyPage: React.FC<MyPageProps> = ({
 
             <div className="flex flex-col gap-4 border-t border-slate-200/70 pt-6 dark:border-slate-800 md:flex-row md:items-center md:justify-between">
               <p className="text-sm leading-6 text-slate-500 dark:text-slate-400">
-                저장 후 헤더 프로필, 커뮤니티 표시 정보, 대시보드 복무 계산 카드에 즉시 반영됩니다.
+                저장 후 헤더 프로필과 대시보드 계산 카드가 현재 회원 유형 기준으로 즉시 갱신됩니다.
               </p>
               <button
                 type="submit"
-                disabled={isSaving || !form.nickname.trim() || !!nicknameError || !!enlistmentDateError}
+                disabled={
+                  isSaving ||
+                  !form.nickname.trim() ||
+                  !!nicknameError ||
+                  !!userTypeError ||
+                  !!serviceTrackError ||
+                  !!enlistmentDateError
+                }
                 className="inline-flex items-center justify-center rounded-full bg-[linear-gradient(135deg,#0ea5e9,#2563eb,#14b8a6)] px-7 py-3 text-sm font-bold text-white shadow-[0_18px_40px_-24px_rgba(37,99,235,0.8)] transition-transform hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isSaving ? '저장 중...' : '개인정보 저장'}

@@ -1,9 +1,11 @@
 export interface Profile {
   id: string;
   nickname: string;
+  user_type: string | null;
   rank: string | null;
   unit: string | null;
   enlistment_date: string | null;
+  service_track: string | null;
   profile_completed: boolean;
   avatar_url: string | null;
   created_at: string;
@@ -12,7 +14,9 @@ export interface Profile {
 
 export interface ProfileFormValues {
   nickname: string;
+  userType: string;
   rank: string;
   unit: string;
   enlistmentDate: string;
+  serviceTrack: string;
 }
