@@ -12,8 +12,8 @@ const KAKAO_MAP_KEY = process.env.REACT_APP_KAKAO_MAP_KEY || '';
 export const TrainingCenterModal: React.FC<TrainingCenterModalProps> = ({ center, onClose }) => {
   const [loading] = useKakaoLoader({
     appkey: KAKAO_MAP_KEY,
-    libraries: ['services'],
   });
+  const zoneLabel = center.zones.join(', ');
 
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
@@ -50,7 +50,7 @@ export const TrainingCenterModal: React.FC<TrainingCenterModalProps> = ({ center
                 {center.status}
               </span>
               <span className="text-sm text-on-surface-variant dark:text-slate-400 font-medium">
-                {center.sido} {center.zone}
+                {center.sido} {zoneLabel}
               </span>
               {center.distance != null && (
                 <span className="text-sm text-primary dark:text-blue-400 font-bold">
@@ -104,6 +104,18 @@ export const TrainingCenterModal: React.FC<TrainingCenterModalProps> = ({ center
               <div>
                 <p className="text-xs font-bold text-on-surface-variant dark:text-slate-400 uppercase tracking-wider mb-1">연락처</p>
                 <p className="text-sm text-on-surface dark:text-white">{center.phone || '정보 없음'}</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3 p-4 rounded-xl bg-surface-container-low dark:bg-slate-800/50 sm:col-span-2">
+              <span className="material-symbols-outlined text-primary dark:text-blue-400 mt-0.5" translate="no">badge</span>
+              <div>
+                <p className="text-xs font-bold text-on-surface-variant dark:text-slate-400 uppercase tracking-wider mb-1">관할 지역</p>
+                <p className="text-sm text-on-surface dark:text-white">{zoneLabel}</p>
+                {center.aliases.length > 1 && (
+                  <p className="text-xs text-on-surface-variant dark:text-slate-400 mt-2">
+                    통합된 명칭: {center.aliases.join(' / ')}
+                  </p>
+                )}
               </div>
             </div>
           </div>

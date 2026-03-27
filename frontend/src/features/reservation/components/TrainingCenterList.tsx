@@ -16,7 +16,16 @@ export const TrainingCenterList: React.FC<TrainingCenterListProps> = ({ centers,
   const filteredCenters = useMemo(() => {
     if (!searchQuery.trim()) return centers;
     const q = searchQuery.trim().toLowerCase();
-    return centers.filter((c) => c.name.toLowerCase().includes(q) || c.address.toLowerCase().includes(q));
+    return centers.filter((center) => {
+      const aliases = center.aliases.join(' ').toLowerCase();
+      const zones = center.zones.join(' ').toLowerCase();
+      return (
+        center.name.toLowerCase().includes(q) ||
+        aliases.includes(q) ||
+        center.address.toLowerCase().includes(q) ||
+        zones.includes(q)
+      );
+    });
   }, [centers, searchQuery]);
 
   useEffect(() => {

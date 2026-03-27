@@ -8,6 +8,11 @@ interface TrainingCenterCardProps {
 }
 
 export const TrainingCenterCard: React.FC<TrainingCenterCardProps> = ({ center, onDetailClick, isHighlighted }) => {
+  const zoneLabel =
+    center.zones.length <= 2
+      ? center.zones.join(', ')
+      : `${center.zones.slice(0, 2).join(', ')} 외 ${center.zones.length - 2}곳`;
+
   return (
     <div
       data-center-id={center.id}
@@ -27,7 +32,7 @@ export const TrainingCenterCard: React.FC<TrainingCenterCardProps> = ({ center, 
               {center.status}
             </span>
             <span className="text-xs text-on-surface-variant dark:text-slate-400 font-medium">
-              {center.zone}
+              {zoneLabel}
             </span>
             {center.distance != null && (
               <span className="text-xs text-primary dark:text-blue-400 font-bold">
@@ -40,6 +45,11 @@ export const TrainingCenterCard: React.FC<TrainingCenterCardProps> = ({ center, 
       <p className="text-sm text-on-surface-variant dark:text-slate-400 mb-2 line-clamp-1">
         {center.address}
       </p>
+      {center.sourceCount > 1 && (
+        <p className="text-xs text-on-surface-variant dark:text-slate-500 mb-2">
+          관할 지역 {center.zones.length}곳 통합
+        </p>
+      )}
       {center.phone && (
         <p className="text-xs text-on-surface-variant dark:text-slate-500 mb-4">
           <span className="material-symbols-outlined text-xs align-middle mr-1" translate="no">call</span>
