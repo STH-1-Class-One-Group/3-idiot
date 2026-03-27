@@ -89,3 +89,5 @@ true
 참고로 네이버 api로 받아오는 값은 title, link, pubDate, thumbnail이고, defense_news 테이블의 속성은 id(고유 uuid), title(text, 네이버 api의 title과 대응), link(text, 네이버 api의 link와 대응), published_at(timestamp, 네이버 api의 pubDate와 대응), thumbnail_url(text, 네이버 api의 thumbnail과 대응) 이야, 이 속성들에 맞추어서 데이터를 저장해주었으면 해, 구조의 형태는 GEMINI.md 문서의 내용을 참고해주었으면 해
 
 17. profiles 테이블의 id(uuid)를 통해 bookmarks_news에서 user_id를 받고, defense_news 테이블에서 id(uuid)를 또 받아서 bookmarks_news의 user_id에 넣으려고 하거든? 그리고 유저가 특정 뉴스의 북마크를 지정을 하게 되면 bookmarks_news 테이블에 해당 유저와 해당 뉴스의 id를 불러오는 방식으로 구현하려고 해, 구조의 형태는 GEMINI.md 문서의 내용을 참고해주었으면 해, 그리고 북마크 디자인 부분(뉴스 별 북마크 및 검색창 옆 북마크 버튼)은 stitch/news의 code.html, screen.png를 참고했으면 해
+
+18. 리액트의 web share api를 통해서 뉴스의 공유 기능을 만들어보려고 하거든, 예를 들어 내가 어떤 뉴스의 공유하기 버튼을 하나 클릭을 해, 그러면 해당 뉴스의 url을 공유할 수 있는 창이 뜨는거야, 그리고 web share api를 통해 그 링크를 복사를 하거나 공유할 수 있도록 하고 싶어, 구조의 형태는 GEMINI.md나 plan.md의 문서의 내용을 참고해주었으면 하고, 공유하기 버튼에 대한 디자인 형태는 stitch/news의 code.html, screen.png를 참고했으면 해
