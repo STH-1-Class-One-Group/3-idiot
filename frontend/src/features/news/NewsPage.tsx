@@ -38,8 +38,26 @@ const mergeUniqueNews = (existingItems: NewsItem[], nextItems: NewsItem[]) => {
 
 const getSafeNewsText = (value: unknown) => (typeof value === 'string' ? value : '');
 
+const fallbackCopyToClipboard = async (text: string) => {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+
+  const textarea = document.createElement('textarea');
+  textarea.value = text;
+  textarea.setAttribute('readonly', '');
+  textarea.style.position = 'absolute';
+  textarea.style.left = '-9999px';
+  document.body.appendChild(textarea);
+  textarea.select();
+  document.execCommand('copy');
+  document.body.removeChild(textarea);
+};
+
 export const NewsPage: React.FC = () => {
   const newsRequestSeqRef = useRef(0);
+  const shareFeedbackTimerRef = useRef<number | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [allNews, setAllNews] = useState<NewsItem[]>([]);
   const [bookmarkIds, setBookmarkIds] = useState<Set<string>>(new Set());
@@ -51,11 +69,20 @@ export const NewsPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showBookmarksOnly, setShowBookmarksOnly] = useState(false);
   const [bookmarkFeedback, setBookmarkFeedback] = useState('');
+  const [shareFeedback, setShareFeedback] = useState('');
 
   const itemsPerPage = 8;
   const newsTargetCount = 30;
   const initialBatchSize = 4;
   const followupBatchSize = 4;
+
+  useEffect(() => {
+    return () => {
+      if (shareFeedbackTimerRef.current !== null) {
+        window.clearTimeout(shareFeedbackTimerRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -299,6 +326,63 @@ export const NewsPage: React.FC = () => {
     setCurrentPage((prev) => (prev < totalPages ? prev + 1 : prev));
   };
 
+  const showShareFeedback = (message: string) => {
+    setShareFeedback(message);
+
+    if (shareFeedbackTimerRef.current !== null) {
+      window.clearTimeout(shareFeedbackTimerRef.current);
+    }
+
+    shareFeedbackTimerRef.current = window.setTimeout(() => {
+      setShareFeedback('');
+      shareFeedbackTimerRef.current = null;
+    }, 2500);
+  };
+
+  const handleShare = async (
+    event: React.MouseEvent<HTMLButtonElement>,
+    news: NewsItem
+  ) => {
+    event.stopPropagation();
+
+    const shareTitle = getSafeNewsText(news.title) || 'Defense News';
+    const shareUrl = getSafeNewsText(news.link);
+
+    if (!shareUrl) {
+      showShareFeedback('공유할 뉴스 링크가 없습니다.');
+      return;
+    }
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: shareTitle,
+          text: shareTitle,
+          url: shareUrl,
+        });
+        showShareFeedback('뉴스 링크를 공유했습니다.');
+        return;
+      }
+
+      await fallbackCopyToClipboard(shareUrl);
+      showShareFeedback('뉴스 링크를 복사했습니다.');
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        return;
+      }
+
+      console.error('[NewsPage] failed to share news:', error);
+
+      try {
+        await fallbackCopyToClipboard(shareUrl);
+        showShareFeedback('뉴스 링크를 복사했습니다.');
+      } catch (copyError) {
+        console.error('[NewsPage] failed to copy shared news link:', copyError);
+        showShareFeedback('뉴스 링크 공유에 실패했습니다.');
+      }
+    }
+  };
+
   const handleBookmarkToggle = async (
     event: React.MouseEvent<HTMLButtonElement>,
     news: NewsItem
@@ -454,6 +538,9 @@ export const NewsPage: React.FC = () => {
         {bookmarkFeedback ? (
           <p className="mt-3 text-sm font-medium text-error dark:text-red-300">{bookmarkFeedback}</p>
         ) : null}
+        {shareFeedback ? (
+          <p className="mt-3 text-sm font-medium text-primary dark:text-blue-300">{shareFeedback}</p>
+        ) : null}
       </section>
 
       <div className="rounded-xl border border-transparent bg-surface-container-lowest p-8 shadow-[0_12px_40px_rgba(27,28,28,0.06)] transition-all dark:border-slate-800 dark:bg-slate-900/50">
@@ -529,7 +616,17 @@ export const NewsPage: React.FC = () => {
                     <h3 className="mb-6 line-clamp-3 text-base font-bold leading-snug text-on-surface transition-colors group-hover:text-primary dark:text-white dark:group-hover:text-blue-400">
                       {getSafeNewsText(news.title)}
                     </h3>
-                    <div className="mt-auto flex items-center justify-end border-t border-outline-variant/15 pt-4 dark:border-slate-800">
+                    <div className="mt-auto flex items-center justify-between border-t border-outline-variant/15 pt-4 dark:border-slate-800">
+                      <button
+                        type="button"
+                        className="flex items-center justify-center rounded-full p-2 text-on-surface-variant transition-colors hover:text-primary dark:text-slate-400 dark:hover:text-blue-400"
+                        onClick={(event) => void handleShare(event, news)}
+                        aria-label="뉴스 공유하기"
+                      >
+                        <span className="material-symbols-outlined text-xl" translate="no">
+                          share
+                        </span>
+                      </button>
                       <button
                         type="button"
                         className={`flex items-center justify-center rounded-full p-2 transition-colors ${
