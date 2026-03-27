@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.meal import router as meal_router
 from app.api.v1.news import router as news_router
 from app.api.v1.community import router as community_router
+from app.core.config import settings
 from app.services import community_service
 from app.services.news_fetcher import close_news_http_client
 
@@ -23,10 +24,7 @@ app = FastAPI(
 # CORS 설정 - 프론트엔드에서의 요청 허용
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",    # React dev server
-        "http://127.0.0.1:3000",
-    ],
+    allow_origins=settings.cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

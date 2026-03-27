@@ -3,7 +3,6 @@ from typing import Optional
 from jose import JWTError, jwt
 from app.core.config import settings
 
-# Supabase PostgREST 기본 URL
 SUPABASE_REST = f"{settings.supabase_url}/rest/v1"
 _http_client: Optional[httpx.AsyncClient] = None
 

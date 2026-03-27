@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     cf_account_id: str = ""
     cf_kv_namespace_id: str = ""
     cf_api_token: str = ""
+    backend_cors_origins: str = ""
 
     # Naver API
     naver_client_id: str = ""
@@ -34,6 +35,7 @@ class Settings(BaseSettings):
         "supabase_url",
         "supabase_anon_key",
         "supabase_service_role_key",
+        "backend_cors_origins",
         mode="before",
     )
     @classmethod
@@ -41,6 +43,19 @@ class Settings(BaseSettings):
         if isinstance(value, str):
             return value.strip()
         return value
+
+    @property
+    def cors_origins(self) -> list[str]:
+        defaults = [
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+        ]
+        extra_origins = [
+            origin.strip()
+            for origin in self.backend_cors_origins.split(",")
+            if origin.strip()
+        ]
+        return defaults + [origin for origin in extra_origins if origin not in defaults]
 
 
 settings = Settings()
