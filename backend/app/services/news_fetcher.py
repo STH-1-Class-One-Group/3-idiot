@@ -18,6 +18,7 @@ NAVER_NEWS_API_URL = "https://openapi.naver.com/v1/search/news.json"
 NAVER_IMAGE_API_URL = "https://openapi.naver.com/v1/search/image.json"
 DEFENSE_NEWS_QUERY = '국방 OR "방위산업" OR "K-방산"'
 NETWORK_TIMEOUT = httpx.Timeout(5.0, connect=2.0)
+NAVER_NEWS_SORT = "date"
 
 
 _http_client: Optional[httpx.AsyncClient] = None
@@ -160,9 +161,26 @@ def parse_naver_pub_date(pub_date: str) -> Optional[datetime]:
         return None
 
 
-def format_pub_date(value: Optional[datetime]) -> str:
+def format_pub_date(value: Optional[Any]) -> str:
     if not value:
         return ""
+
+    if isinstance(value, str):
+        normalized = value.strip()
+        if not normalized:
+            return ""
+
+        try:
+            value = datetime.fromisoformat(normalized.replace("Z", "+00:00"))
+        except ValueError:
+            try:
+                value = parsedate_to_datetime(normalized)
+            except (TypeError, ValueError) as error:
+                logger.warning("Failed to format published date '%s': %s", normalized, error)
+                return normalized
+
+    if not isinstance(value, datetime):
+        return str(value)
 
     if value.tzinfo is None:
         value = value.replace(tzinfo=timezone.utc)
@@ -171,6 +189,7 @@ def format_pub_date(value: Optional[datetime]) -> str:
 
 def map_cached_news_row(row: Dict[str, Any]) -> Dict[str, Any]:
     return {
+        "id": row.get("id"),
         "title": row["title"],
         "link": row["link"],
         "pubDate": format_pub_date(row.get("published_at")),
@@ -185,6 +204,7 @@ def normalize_news_item(item: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         return None
 
     return {
+        "id": item.get("id"),
         "title": title,
         "link": link,
         "pubDate": item.get("pubDate", ""),
@@ -234,7 +254,7 @@ async def fetch_cached_news_from_supabase_debug(
 
     offset = max(start - 1, 0)
     params = {
-        "select": "title,link,published_at,thumbnail_url",
+        "select": "id,title,link,published_at,thumbnail_url",
         "order": "published_at.desc.nullslast,created_at.desc",
         "limit": str(limit),
         "offset": str(offset),
@@ -342,7 +362,7 @@ async def upsert_defense_news_to_supabase_debug(
         response = await client.post(
             f"{supabase_url}/rest/v1/defense_news",
             headers=request_headers,
-            params={"on_conflict": "link", "select": "link"},
+            params={"on_conflict": "link", "select": "id,title,link,published_at,thumbnail_url"},
             json=payload,
         )
 
@@ -399,7 +419,7 @@ def fetch_cached_news_from_db_debug(limit: int, start: int) -> Dict[str, Any]:
             with conn.cursor(cursor_factory=RealDictCursor) as cursor:
                 cursor.execute(
                     """
-                    select title, link, published_at, thumbnail_url
+                    select id, title, link, published_at, thumbnail_url
                     from public.defense_news
                     order by published_at desc nulls last, created_at desc
                     limit %s offset %s
@@ -527,7 +547,7 @@ async def fetch_naver_news(query: str, display: int = 4, start: int = 1) -> List
         "query": query,
         "display": display,
         "start": start,
-        "sort": "sim",
+        "sort": NAVER_NEWS_SORT,
     }
 
     client = get_news_http_client()
@@ -621,8 +641,9 @@ async def get_defense_news(
     # However, let's keep it awaited but optimized.
     await persist_defense_news(results, user_authorization)
 
-    # Return the results we just fetched instead of re-fetching from DB
-    return results
+    # Return persisted rows so the frontend can use stable defense_news IDs.
+    persisted_news = await fetch_cached_news(limit, start, user_authorization)
+    return persisted_news or results
 
 
 async def debug_defense_news(
