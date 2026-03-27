@@ -1,5 +1,11 @@
 import React from 'react';
-import { supabase } from '../../api/supabaseClient';
+
+import {
+  getSupabaseConfigErrorMessage,
+  getSupabaseRuntimeErrorMessage,
+  hasSupabaseConfig,
+  supabase,
+} from '../../api/supabaseClient';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -12,6 +18,11 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   const handleLogin = async (provider: OAuthProvider) => {
+    if (!hasSupabaseConfig) {
+      alert(getSupabaseConfigErrorMessage());
+      return;
+    }
+
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: provider as Parameters<typeof supabase.auth.signInWithOAuth>[0]['provider'],
@@ -28,8 +39,8 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
       if (error) {
         throw error;
       }
-    } catch (error: any) {
-      alert(`로그인 요청 중 문제가 발생했습니다: ${error.message}`);
+    } catch (error) {
+      alert(`로그인 요청 중 문제가 발생했습니다: ${getSupabaseRuntimeErrorMessage(error)}`);
     }
   };
 
@@ -47,8 +58,9 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         </div>
 
         <p className="mb-8 text-center text-sm text-on-surface-variant dark:text-slate-400">
-          Modern Sentinel에 로그인하여<br />
-          맞춤형 군 생활 관리 서비스를 이용해보세요.
+          Modern Sentinel에 로그인하고
+          <br />
+          맞춤형 군생활 관리 서비스를 이용해보세요.
         </p>
 
         <div className="space-y-3">
@@ -75,11 +87,12 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         </div>
 
         <div className="mt-8 text-center text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-          로그인 시 Modern Sentinel의
+          로그인하면 Modern Sentinel의
           <button type="button" className="mx-1 underline hover:text-primary">
             이용약관
           </button>
-          및<br />
+          및
+          <br />
           <button type="button" className="underline hover:text-primary">
             개인정보처리방침
           </button>

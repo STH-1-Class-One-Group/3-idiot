@@ -1,5 +1,6 @@
 import {
-  getSupabaseErrorMessage,
+  getSupabaseConfigErrorMessage,
+  getSupabaseRuntimeErrorMessage,
   hasSupabaseConfig,
   supabase,
 } from '../../../api/supabaseClient';
@@ -10,9 +11,7 @@ const fetchShopProductsFromSupabase = async (
   pageSize: number
 ): Promise<ProductListResponse> => {
   if (!hasSupabaseConfig) {
-    throw new Error(
-      'Supabase browser client is not configured. In this react-scripts app, the client-exposed variables still need to be available at runtime.'
-    );
+    throw new Error(getSupabaseConfigErrorMessage());
   }
 
   const offset = (page - 1) * pageSize;
@@ -22,7 +21,7 @@ const fetchShopProductsFromSupabase = async (
     .select('*', { count: 'exact', head: true });
 
   if (countError) {
-    throw new Error(getSupabaseErrorMessage(countError));
+    throw new Error(getSupabaseRuntimeErrorMessage(countError, '상품 개수를 불러오지 못했습니다.'));
   }
 
   const { data, error: dataError } = await supabase
@@ -32,7 +31,7 @@ const fetchShopProductsFromSupabase = async (
     .range(offset, offset + pageSize - 1);
 
   if (dataError) {
-    throw new Error(getSupabaseErrorMessage(dataError));
+    throw new Error(getSupabaseRuntimeErrorMessage(dataError, '상품 목록을 불러오지 못했습니다.'));
   }
 
 
@@ -52,9 +51,7 @@ const fetchShopProductsFromSupabase = async (
 
 const fetchAllShopProductsFromSupabase = async (): Promise<Product[]> => {
   if (!hasSupabaseConfig) {
-    throw new Error(
-      'Supabase browser client is not configured. In this react-scripts app, the client-exposed variables still need to be available at runtime.'
-    );
+    throw new Error(getSupabaseConfigErrorMessage());
   }
 
   const { data, error } = await supabase
@@ -63,7 +60,7 @@ const fetchAllShopProductsFromSupabase = async (): Promise<Product[]> => {
     .order('id', { ascending: true });
 
   if (error) {
-    throw new Error(getSupabaseErrorMessage(error));
+    throw new Error(getSupabaseRuntimeErrorMessage(error, '상품 검색 데이터를 불러오지 못했습니다.'));
   }
 
 

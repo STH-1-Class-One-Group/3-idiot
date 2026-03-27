@@ -11,7 +11,7 @@ import { ArmedReservePage } from './features/armedReserve/ArmedReservePage';
 import { RecruitmentPage } from './features/recruitment/RecruitmentPage';
 import { CartProvider } from './features/cart/context/CartContext';
 import { CartModal } from './features/cart/components/CartModal';
-import { supabase } from './api/supabaseClient';
+import { hasSupabaseConfig, supabase } from './api/supabaseClient';
 import { ProfileSetupModal, Profile } from './components/common/ProfileSetupModal';
 import { CommunityPage } from './features/community/CommunityPage';
 import { PostDetailPage } from './features/community/PostDetailPage';
@@ -51,6 +51,10 @@ const clearSupabaseAuthStorage = () => {
 const hasSupabaseAuthStorage = () => getSupabaseAuthStorageEntries().length > 0;
 
 const loadProfile = async (currentUser: User): Promise<Profile | null> => {
+  if (!hasSupabaseConfig) {
+    return null;
+  }
+
   const { data, error } = await supabase
     .from('profiles')
     .select('*')
@@ -74,6 +78,15 @@ const App: React.FC = () => {
     let isActive = true;
 
     const syncInitialSession = async () => {
+      if (!hasSupabaseConfig) {
+        if (isActive) {
+          setUser(null);
+          setProfile(null);
+          setShowProfileSetup(false);
+        }
+        return;
+      }
+
       const {
         data: { session },
         error,
@@ -96,6 +109,12 @@ const App: React.FC = () => {
     };
 
     void syncInitialSession();
+
+    if (!hasSupabaseConfig) {
+      return () => {
+        isActive = false;
+      };
+    }
 
     const {
       data: { subscription },
@@ -153,6 +172,14 @@ const App: React.FC = () => {
   }, [user]);
 
   const handleSignOut = async () => {
+    if (!hasSupabaseConfig) {
+      clearSupabaseAuthStorage();
+      setUser(null);
+      setProfile(null);
+      setShowProfileSetup(false);
+      return;
+    }
+
     const { error } = await supabase.auth.signOut({ scope: 'local' });
     if (error) {
       console.error('[App] signOut failed:', error);

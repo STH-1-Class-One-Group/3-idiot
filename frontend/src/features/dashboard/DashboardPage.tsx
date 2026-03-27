@@ -1,6 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { buildApiUrl } from '../../api/apiBaseUrl';
+import {
+  buildApiUrl,
+  getApiResponseErrorMessage,
+  getApiRuntimeErrorMessage,
+  isNetworkFetchError,
+} from '../../api/apiBaseUrl';
 import { MealPopup, MealItem } from './components/MealPopup';
 import { fetchNewsBatch } from '../news/newsApi';
 
@@ -73,6 +78,8 @@ export const DashboardPage: React.FC = () => {
   const [mealInfo, setMealInfo] = useState(DEFAULT_MEAL_INFO);
   const [newsList, setNewsList] = useState<NewsItem[]>([]);
   const [isNewsLoading, setIsNewsLoading] = useState(true);
+  const [mealError, setMealError] = useState('');
+  const [newsError, setNewsError] = useState('');
 
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [selectedMealType, setSelectedMealType] = useState('');
@@ -175,11 +182,12 @@ export const DashboardPage: React.FC = () => {
 
     const fetchMeals = async () => {
       setMealInfo(DEFAULT_MEAL_INFO);
+      setMealError('');
       try {
         const todayDate = getTodayString();
         const response = await fetch(buildApiUrl(`/api/v1/meals/${todayDate}`));
         if (!response.ok) {
-          throw new Error('Failed to fetch meals');
+          throw new Error(getApiResponseErrorMessage(response.status, '식단 데이터'));
         }
 
         const result: MealApiResponse = await response.json();
@@ -190,6 +198,11 @@ export const DashboardPage: React.FC = () => {
         await processMealData(result.data);
       } catch (error) {
         console.error('[DashboardPage] meal fetch failed, using fallback:', error);
+        setMealError(
+          isNetworkFetchError(error)
+            ? getApiRuntimeErrorMessage('식단 데이터')
+            : '식단 데이터를 불러오지 못해 기본 메뉴를 표시합니다.'
+        );
         await processMealData(FALLBACK_MEALS(getTodayDisplayString()));
       }
     };
@@ -197,6 +210,7 @@ export const DashboardPage: React.FC = () => {
     const fetchNews = async () => {
       setIsNewsLoading(true);
       setNewsList([]);
+      setNewsError('');
       const controller = new AbortController();
       const timeoutId = window.setTimeout(() => controller.abort(), 8000);
 
@@ -206,7 +220,7 @@ export const DashboardPage: React.FC = () => {
           forceRefresh: false,
         });
         if (!response.ok) {
-          throw new Error('Failed to fetch defense news');
+          throw new Error(getApiResponseErrorMessage(response.status, '뉴스'));
         }
 
         const data: NewsItem[] = await response.json();
@@ -216,6 +230,11 @@ export const DashboardPage: React.FC = () => {
         setNewsList(uniqueNews);
       } catch (error) {
         console.error('[DashboardPage] news fetch failed:', error);
+        setNewsError(
+          isNetworkFetchError(error)
+            ? getApiRuntimeErrorMessage('뉴스')
+            : '뉴스를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.'
+        );
       } finally {
         window.clearTimeout(timeoutId);
         setIsNewsLoading(false);
@@ -321,6 +340,11 @@ export const DashboardPage: React.FC = () => {
           <div className="mb-6 flex items-center justify-between sm:mb-8">
             <h2 className="text-xl font-bold text-on-surface dark:text-white">오늘의 식단</h2>
           </div>
+          {mealError ? (
+            <p className="mb-4 rounded-lg bg-amber-50 px-3 py-2 text-xs font-medium text-amber-700 dark:bg-amber-500/10 dark:text-amber-300">
+              {mealError}
+            </p>
+          ) : null}
           <div className="space-y-4">
             <div
               className="group -mx-2 flex cursor-pointer items-start justify-between rounded-lg p-2 transition-colors hover:bg-surface-variant/30"
@@ -381,6 +405,11 @@ export const DashboardPage: React.FC = () => {
               전체보기
             </button>
           </div>
+          {newsError ? (
+            <p className="mb-4 rounded-lg bg-rose-50 px-3 py-2 text-xs font-medium text-rose-700 dark:bg-rose-500/10 dark:text-rose-300">
+              {newsError}
+            </p>
+          ) : null}
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6">
             {isNewsLoading ? (
               [1, 2, 3, 4].map((i) => (

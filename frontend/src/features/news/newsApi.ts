@@ -1,4 +1,4 @@
-import { supabase } from '../../api/supabaseClient';
+import { hasSupabaseConfig, supabase } from '../../api/supabaseClient';
 import { buildApiUrl } from '../../api/apiBaseUrl';
 
 export interface NewsItemPayload {
@@ -16,6 +16,10 @@ export interface NewsBookmark {
 }
 
 const getNewsRequestHeaders = async (): Promise<HeadersInit> => {
+  if (!hasSupabaseConfig) {
+    return {};
+  }
+
   const {
     data: { session },
   } = await supabase.auth.getSession();

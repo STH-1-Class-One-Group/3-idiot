@@ -1,7 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { User } from '@supabase/supabase-js';
 
-import { supabase } from '../../api/supabaseClient';
+import {
+  getSupabaseConfigErrorMessage,
+  hasSupabaseConfig,
+  supabase,
+} from '../../api/supabaseClient';
 import { SearchBar } from '../../components/common/SearchBar';
 import {
   createNewsBookmark,
@@ -10,7 +14,12 @@ import {
   fetchNewsBookmarks,
   NewsItemPayload,
 } from './newsApi';
-import { buildApiUrl } from '../../api/apiBaseUrl';
+import {
+  buildApiUrl,
+  getApiResponseErrorMessage,
+  getApiRuntimeErrorMessage,
+  isNetworkFetchError,
+} from '../../api/apiBaseUrl';
 
 interface NewsItem extends NewsItemPayload {
   id?: string;
@@ -71,6 +80,7 @@ export const NewsPage: React.FC = () => {
   const [showBookmarksOnly, setShowBookmarksOnly] = useState(false);
   const [bookmarkFeedback, setBookmarkFeedback] = useState('');
   const [shareFeedback, setShareFeedback] = useState('');
+  const [newsError, setNewsError] = useState('');
 
   const itemsPerPage = 8;
   const newsTargetCount = 30;
@@ -89,6 +99,13 @@ export const NewsPage: React.FC = () => {
     let isMounted = true;
 
     const syncUser = async () => {
+      if (!hasSupabaseConfig) {
+        if (isMounted) {
+          setUser(null);
+        }
+        return;
+      }
+
       const {
         data: { user: currentUser },
       } = await supabase.auth.getUser();
@@ -99,6 +116,12 @@ export const NewsPage: React.FC = () => {
     };
 
     void syncUser();
+
+    if (!hasSupabaseConfig) {
+      return () => {
+        isMounted = false;
+      };
+    }
 
     const {
       data: { subscription },
@@ -127,6 +150,7 @@ export const NewsPage: React.FC = () => {
         setIsLoading(true);
         setIsLoadingMore(false);
         setAllNews([]);
+        setNewsError('');
 
         const loadBatch = async (start: number, batchSize: number) => {
           try {
@@ -136,7 +160,7 @@ export const NewsPage: React.FC = () => {
             });
 
             if (!response.ok) {
-              throw new Error(`Failed to fetch news batch at start=${start}`);
+              throw new Error(getApiResponseErrorMessage(response.status, '뉴스'));
             }
 
             const payload = (await response.json()) as NewsItem[];
@@ -151,6 +175,15 @@ export const NewsPage: React.FC = () => {
           } catch (error) {
             if (controller.signal.aborted) {
               return [];
+            }
+            if (start === 1 && isLatestRequest()) {
+              setNewsError(
+                isNetworkFetchError(error)
+                  ? getApiRuntimeErrorMessage('뉴스')
+                  : error instanceof Error
+                    ? error.message
+                    : '뉴스를 불러오지 못했습니다.'
+              );
             }
             console.error(`[NewsPage] failed to load news batch at start=${start}:`, error);
             return [];
@@ -248,7 +281,7 @@ export const NewsPage: React.FC = () => {
         setIsBookmarkLoading(true);
         const response = await fetchNewsBookmarks({ signal: controller.signal });
         if (!response.ok) {
-          throw new Error('Failed to fetch bookmarks');
+          throw new Error(getApiResponseErrorMessage(response.status, '북마크'));
         }
 
         const data: Array<{ newsId: string }> = await response.json();
@@ -395,6 +428,11 @@ export const NewsPage: React.FC = () => {
       return;
     }
 
+    if (!hasSupabaseConfig) {
+      setBookmarkFeedback(getSupabaseConfigErrorMessage());
+      return;
+    }
+
     const bookmarkKey = getNewsKey(news);
     const existingNewsId = news.id;
     const isBookmarked = Boolean(existingNewsId && bookmarkIds.has(existingNewsId));
@@ -424,7 +462,7 @@ export const NewsPage: React.FC = () => {
         : await createNewsBookmark(news);
 
       if (!response.ok) {
-        throw new Error('Failed to update bookmark');
+        throw new Error(getApiResponseErrorMessage(response.status, '북마크'));
       }
 
       if (!isBookmarked) {
@@ -541,6 +579,9 @@ export const NewsPage: React.FC = () => {
         ) : null}
         {shareFeedback ? (
           <p className="mt-3 text-sm font-medium text-primary dark:text-blue-300">{shareFeedback}</p>
+        ) : null}
+        {newsError ? (
+          <p className="mt-3 text-sm font-medium text-rose-600 dark:text-rose-300">{newsError}</p>
         ) : null}
       </section>
 

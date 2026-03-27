@@ -108,3 +108,131 @@ true
 
 
 22. 지금 페이지들에 대해 전체적으로 반응형 디자인을 작성해보려고 하거든? 일단 frontend/public/responsive에서 각종 디바이스에 대한 반응형 디자인을 참고해서, 모바일, 태블릿에 대한 반응형 디자인을 추가적으로 작성해주었으면 해, 태블릿일 때는 페이지를 왼쪽의 햄버거 버튼으로 만들고 모바일에서는 오른쪽의 설정들을 하나의 케밥 버튼으로 만든 것도 참고하면 좋겠어 구조의 형태는 GEMINI.md 문서의 내용을 참고해주었으면 해
+
+
+
+23. 지금 전체적으로 오류가 좀 많아, 일단 아까 전까지 제대로 불러와지던 데이터들을 제대로 불러오지 못하고 있는 상황이야(supabase의 데이터베이스상품 로드 오류: Supabase browser client is not configured. In this react-scripts app, the client-exposed variables still need to be available at runtime., cloudflare worker kv, 네이버 뉴스 apiDashboardPage.tsx:180  GET http://localhost:8000/api/v1/meals/2026-03-28 net::ERR_CONNECTION_REFUSED
+(익명) @ DashboardPage.tsx:180
+(익명) @ DashboardPage.tsx:225
+gl @ react-dom-client.production.js:8583
+ec @ react-dom-client.production.js:10126
+Zl @ react-dom-client.production.js:10101
+ec @ react-dom-client.production.js:10241
+Zl @ react-dom-client.production.js:10101
+ec @ react-dom-client.production.js:10120
+Zl @ react-dom-client.production.js:10101
+ec @ react-dom-client.production.js:10120
+Zl @ react-dom-client.production.js:10101
+ec @ react-dom-client.production.js:10241
+Zl @ react-dom-client.production.js:10101
+ec @ react-dom-client.production.js:10241
+Zl @ react-dom-client.production.js:10101
+ec @ react-dom-client.production.js:10241
+Zl @ react-dom-client.production.js:10101
+ec @ react-dom-client.production.js:10241
+Zl @ react-dom-client.production.js:10101
+ec @ react-dom-client.production.js:10120
+Zl @ react-dom-client.production.js:10101
+ec @ react-dom-client.production.js:10120
+Zl @ react-dom-client.production.js:10101
+ec @ react-dom-client.production.js:10241
+Zl @ react-dom-client.production.js:10101
+ec @ react-dom-client.production.js:10120
+Zl @ react-dom-client.production.js:10101
+ec @ react-dom-client.production.js:10120
+Zl @ react-dom-client.production.js:10101
+ec @ react-dom-client.production.js:10241
+Zl @ react-dom-client.production.js:10101
+ec @ react-dom-client.production.js:10137
+wu @ react-dom-client.production.js:11763
+(익명) @ react-dom-client.production.js:11498
+T @ scheduler.production.js:151이 오류 이해하기
+installHook.js:1 [DashboardPage] meal fetch failed, using fallback: TypeError: Failed to fetch
+    at DashboardPage.tsx:180:32
+    at DashboardPage.tsx:225:5
+    at gl (react-dom-client.production.js:8583:24)
+    at ec (react-dom-client.production.js:10126:23)
+    at Zl (react-dom-client.production.js:10101:7)
+    at ec (react-dom-client.production.js:10241:7)
+    at Zl (react-dom-client.production.js:10101:7)
+    at ec (react-dom-client.production.js:10120:7)
+    at Zl (react-dom-client.production.js:10101:7)
+    at ec (react-dom-client.production.js:10120:7)
+overrideMethod @ installHook.js:1
+(익명) @ DashboardPage.tsx:192
+await in (익명)
+(익명) @ DashboardPage.tsx:225
+gl @ react-dom-client.production.js:8583
+ec @ react-dom-client.production.js:10126
+Zl @ react-dom-client.production.js:10101
+ec @ react-dom-client.production.js:10241
+Zl @ react-dom-client.production.js:10101
+ec @ react-dom-client.production.js:10120
+Zl @ react-dom-client.production.js:10101
+ec @ react-dom-client.production.js:10120
+Zl @ react-dom-client.production.js:10101
+ec @ react-dom-client.production.js:10241
+Zl @ react-dom-client.production.js:10101
+ec @ react-dom-client.production.js:10241
+Zl @ react-dom-client.production.js:10101
+ec @ react-dom-client.production.js:10241
+Zl @ react-dom-client.production.js:10101
+ec @ react-dom-client.production.js:10241
+Zl @ react-dom-client.production.js:10101
+ec @ react-dom-client.production.js:10120
+Zl @ react-dom-client.production.js:10101
+ec @ react-dom-client.production.js:10120
+Zl @ react-dom-client.production.js:10101
+ec @ react-dom-client.production.js:10241
+Zl @ react-dom-client.production.js:10101
+ec @ react-dom-client.production.js:10120
+Zl @ react-dom-client.production.js:10101
+ec @ react-dom-client.production.js:10120
+Zl @ react-dom-client.production.js:10101
+ec @ react-dom-client.production.js:10241
+Zl @ react-dom-client.production.js:10101
+ec @ react-dom-client.production.js:10137
+wu @ react-dom-client.production.js:11763
+(익명) @ react-dom-client.production.js:11498
+T @ scheduler.production.js:151이 오류 이해하기
+newsApi.ts:44  GET http://localhost:8000/api/v1/news?limit=4&start=1&force_refresh=false net::ERR_CONNECTION_REFUSED
+zi @ newsApi.ts:44
+await in zi
+(익명) @ DashboardPage.tsx:204
+(익명) @ DashboardPage.tsx:226
+gl @ react-dom-client.production.js:8583
+ec @ react-dom-client.production.js:10126
+Zl @ react-dom-client.production.js:10101
+ec @ react-dom-client.production.js:10241
+Zl @ react-dom-client.production.js:10101
+ec @ react-dom-client.production.js:10120
+Zl @ react-dom-client.production.js:10101
+ec @ react-dom-client.production.js:10120
+Zl @ react-dom-client.production.js:10101
+ec @ react-dom-client.production.js:10241
+Zl @ react-dom-client.production.js:10101
+ec @ react-dom-client.production.js:10241
+Zl @ react-dom-client.production.js:10101
+ec @ react-dom-client.production.js:10241
+Zl @ react-dom-client.production.js:10101
+ec @ react-dom-client.production.js:10241
+Zl @ react-dom-client.production.js:10101
+ec @ react-dom-client.production.js:10120
+Zl @ react-dom-client.production.js:10101
+ec @ react-dom-client.production.js:10120
+Zl @ react-dom-client.production.js:10101
+ec @ react-dom-client.production.js:10241
+Zl @ react-dom-client.production.js:10101
+ec @ react-dom-client.production.js:10120
+Zl @ react-dom-client.production.js:10101
+ec @ react-dom-client.production.js:10120
+Zl @ react-dom-client.production.js:10101
+ec @ react-dom-client.production.js:10241
+Zl @ react-dom-client.production.js:10101
+ec @ react-dom-client.production.js:10137
+wu @ react-dom-client.production.js:11763
+(익명) @ react-dom-client.production.js:11498
+T @ scheduler.production.js:151이 오류 이해하기
+installHook.js:1 [DashboardPage] news fetch failed: TypeError: Failed to fetch
+    at zi (newsApi.ts:44:10)
+    at async DashboardPage.tsx:204:15, 모병정보 api까지(모병 모집 API 키가 없습니다. frontend 환경변수에 REACT_APP_DATA_SERVICE_KEY를 설정해 주세요.)) 그리고 community에서도 오류가 발생했어 CommunityPage.tsx:81  GET http://localhost:8000/api/v1/community/posts?page=1&per_page=30 net::ERR_CONNECTION_REFUSED 이 문제들을 좀 해결해주었으면 좋겠어

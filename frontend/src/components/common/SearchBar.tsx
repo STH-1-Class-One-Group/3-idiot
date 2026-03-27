@@ -1,5 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { getSupabaseErrorMessage, supabase } from '../../api/supabaseClient';
+import {
+  getSupabaseRuntimeErrorMessage,
+  hasSupabaseConfig,
+  supabase,
+} from '../../api/supabaseClient';
 
 type SearchType = 'food' | 'news' | 'recruitment';
 
@@ -23,6 +27,10 @@ const DEFAULT_PLACEHOLDERS: Record<SearchType, string> = {
 
 const getFoodImageUrl = (imageUrl: string) => {
   if (!imageUrl) {
+    return '';
+  }
+
+  if (!hasSupabaseConfig && !imageUrl.startsWith('http')) {
     return '';
   }
 
@@ -90,6 +98,11 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         }
 
         if (searchType === 'food') {
+          if (!hasSupabaseConfig) {
+            setResults([]);
+            return;
+          }
+
           const { data, error } = await supabase
             .from('food_items')
             .select('*')
@@ -106,7 +119,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 
         setResults([]);
       } catch (error) {
-        console.error('[SearchBar] search failed:', getSupabaseErrorMessage(error));
+        console.error('[SearchBar] search failed:', getSupabaseRuntimeErrorMessage(error));
         setResults([]);
       } finally {
         setLoading(false);
