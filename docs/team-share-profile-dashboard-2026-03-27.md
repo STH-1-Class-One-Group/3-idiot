@@ -318,22 +318,73 @@ DB 구조:
 - 추천/비추천은 현재 게시글 단위만 구현되어 있으므로, 필요하면 댓글 추천까지 같은 패턴으로 확장 가능
 - `viewer_vote`는 현재 상세 페이지에서 주로 사용하므로, 목록에서도 개인화 표시가 필요하면 인증 헤더 전달 로직을 추가 검토
 
-## 9. 현재 워킹트리 상태
+## 9. 예비군(Armed Reserve) 페이지 신규 구현
 
-이 문서 작성 시점 기준으로, 아래는 아직 커밋되지 않은 다른 작업입니다.
+### 개요
+
+- 예비군 홈페이지(yebigun1.mil.kr)에서 전국 **286개 훈련장** 실데이터를 수집
+- 카카오맵 연동으로 시/도별 훈련장 위치를 지도에 표시
+- `react-kakao-maps-sdk` 라이브러리 도입
+- 카카오 Geocoding API로 주소 → 좌표 자동 변환
+
+### 라우트/네비게이션
+
+- `/ArmedReserve` 라우트 추가
+- Header의 "Armed Reserve" 비활성 버튼 → NavLink로 변환
+
+### 주요 기능
+
+- 시/도 드롭다운 필터 (17개 시/도)
+- 지역 선택 시 해당 훈련장만 지도에 마커 표시 + 자동 영역 맞춤
+- 훈련장 카드: 이름, 상태, 주소, 전화번호 표시
+- "상세보기", "신청하기" 버튼은 UI만 (추후 구현)
+- 북마크 기능은 팀원 별도 구현 후 연동 예정
+- 카카오맵 키 미설정 시 placeholder UI 표시
+- 로딩/빈 결과 상태 UI 포함
+
+### 환경 변수
+
+- `REACT_APP_KAKAO_MAP_KEY`: 카카오 디벨로퍼스에서 JavaScript 키 발급 필요
+- 카카오 디벨로퍼스 > 앱 설정 > 플랫폼 > Web에 `http://localhost:3000` 등록 필요
+- 카카오 디벨로퍼스 > 앱 설정 > 카카오맵 > 사용 설정 ON 필요 (2024.12부터 필수)
+
+### 신규 패키지
+
+- `react-kakao-maps-sdk`: 카카오맵 React 컴포넌트 라이브러리
+- `kakao.maps.d.ts`: 카카오맵 TypeScript 타입 정의
+
+### 관련 파일
+
+신규:
+- `frontend/src/features/reservation/ArmedReservePage.tsx` — 메인 페이지
+- `frontend/src/features/reservation/components/KakaoMap.tsx` — 카카오맵 컴포넌트
+- `frontend/src/features/reservation/components/TrainingCenterCard.tsx` — 훈련소 카드
+- `frontend/src/features/reservation/components/TrainingCenterList.tsx` — 훈련소 리스트
+- `frontend/src/features/reservation/data/trainingCenters.ts` — 타입 정의 + 286개 훈련장 데이터
+- `frontend/src/features/reservation/data/trainingCentersRaw.json` — 원본 JSON 데이터
+
+수정:
+- `frontend/src/App.tsx` — `/ArmedReserve` 라우트 추가
+- `frontend/src/components/layout/Header.tsx` — Armed Reserve NavLink 변환
+
+### 데이터 출처
+
+- 예비군 홈페이지 훈련장 안내 API: `https://www.yebigun1.mil.kr/dmobis/popup/RfTraCenterGuidListPopupAjax.do`
+- POST 요청, `start=0&length=300&draw=1` 파라미터로 전체 286개 조회
+- 각 훈련장: id(uuid), 이름, 시/도, 구/군, 주소, 전화번호 포함
+- 좌표는 포함되지 않아 카카오 Geocoding API로 런타임 변환
+
+## 10. 현재 워킹트리 상태
+
+이 문서 작성 시점 기준으로, 아래는 아직 커밋되지 않은 작업입니다.
 
 - `frontend/src/App.tsx`
 - `frontend/src/components/layout/Header.tsx`
 - `frontend/public/Gemini_Generated_Image_m48tqbm48tqbm48t 1.png`
 - `frontend/public/Whisk_a4132e013c3d79981b846046fbe4a897dr 1.png`
-- `frontend/src/features/reservation/ArmedReservePage.tsx`
-- `frontend/src/features/reservation/components/`
-- `frontend/src/features/reservation/data/`
+- `frontend/src/features/reservation/` (전체 신규)
 
-즉, 이 문서에 적은 프로필/대시보드/정책 페이지/커뮤니티 후속 작업은 구조상 반영되어 있으나,
-위 파일들은 아직 추가 정리나 커밋 분리가 더 필요할 수 있습니다.
-
-## 10. 팀원 액션 아이템
+## 11. 팀원 액션 아이템
 
 - 기존 Supabase 프로젝트라면 `backend/sql/profile_enlistment_date_patch.sql` 실행
 - 커뮤니티 추천/비추천을 쓸 환경이면 `backend/sql/community_votes_patch.sql`도 실행
@@ -342,3 +393,6 @@ DB 구조:
 - 커뮤니티 상세 페이지에서 추천/비추천 토글 동작 확인
 - 간부 계정의 장기 복무/정년/진급 로직을 더 넣을지 논의
 - 필요 시 DB constraint 보강용 SQL 추가
+- 예비군 페이지 사용 시 `.env`에 `REACT_APP_KAKAO_MAP_KEY` 설정 + 카카오 디벨로퍼스 플랫폼/카카오맵 사용 설정 필요
+- `npm install` 재실행 필요 (`react-kakao-maps-sdk`, `kakao.maps.d.ts` 추가됨)
+- 북마크 기능 구현 후 예비군 페이지에 연동 필요

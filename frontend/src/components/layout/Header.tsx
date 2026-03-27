@@ -104,9 +104,16 @@ export const Header: React.FC<HeaderProps> = ({ user, profile, onSignOut }) => {
           >
             Dashboard
           </NavLink>
-          <button type="button" className="text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-300 transition-colors font-['Inter'] text-sm tracking-tight">
+          <NavLink
+            to="/ArmedReserve"
+            className={({ isActive }) =>
+              isActive
+                ? "text-blue-700 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400 pb-1 font-['Inter'] text-sm tracking-tight"
+                : "text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-300 transition-colors font-['Inter'] text-sm tracking-tight"
+            }
+          >
             Armed Reserve
-          </button>
+          </NavLink>
           <button type="button" className="text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-300 transition-colors font-['Inter'] text-sm tracking-tight">
             Recruitment
           </button>

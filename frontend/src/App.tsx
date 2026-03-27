@@ -18,6 +18,7 @@ import PaymentSuccess from './features/cart/components/PaymentSuccess';
 import { TermsOfServicePage } from './features/legal/TermsOfServicePage';
 import { PrivacyPolicyPage } from './features/legal/PrivacyPolicyPage';
 import { SupportPage } from './features/legal/SupportPage';
+import { ArmedReservePage } from './features/reservation/ArmedReservePage';
 import { MyPage } from './features/profile/MyPage';
 import { isProfileSetupRequired } from './features/profile/profileModes';
 import { Profile } from './features/profile/types';
@@ -195,6 +196,7 @@ const App: React.FC = () => {
             <Routes>
               <Route path="/" element={<ShopPage />} />
               <Route path="/Dashboard" element={<DashboardPage profile={profile ?? null} />} />
+              <Route path="/ArmedReserve" element={<ArmedReservePage />} />
               <Route path="/Meal" element={<MealPage />} />
               <Route path="/News" element={<NewsPage />} />
               <Route
