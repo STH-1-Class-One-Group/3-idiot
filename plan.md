@@ -272,4 +272,53 @@ SELECT * FROM food_items ORDER BY id ASC;
 
 ### 모병 모집 데이터 양식
 
-**header{description:headerresultCodestring결과코드resultMsgstring결과메시지}body{description:bodyitems{description:itemsitem{description:itemrnumstring데이터번호gunGbnmstring군구분코드명mojipGbnmstring모집구분명mojipYystring모집년도mojipTmsstring모집년도gsteukgiCdstring군사특기코드gsteukgiNmstring군사특기명iybudaeCdmstring입영부대명seonbalPcntstring선발인원수jeopsuPcntstring접수인원수extremesstring접수-선발인원(과부족)ratestring지원률jeopsuSjdtmstring접수시작일자jeopsuJrdtmstring접수종료일자iyyjsijakYmstring입영시작월iyyjjongryoYmstring입영종료월ipyeongDestring입영년월값}}numOfRowsstring한 페이지 결과 수pageNostring페이지번호totalCountstring전체 결과 수}**
+**header{
+   description:headerresultCodestring결과코드resultMsgstring결과메시지}
+   body{description:body
+   items
+      {
+      {description:item
+      rnum-string데이터번호
+      gunGbnm-string군구분코드명
+      mojipGbnm-string모집구분명
+      mojipYy-string모집년도
+      mojipTms-string모집횟수
+      gsteukgiCd-string군사특기코드
+      gsteukgiNm-string군사특기명
+      iybudaeCdm-string입영부대명
+      seonbalPcnt-string선발인원수
+      jeopsuPcnt-string접수인원수
+      extremes-string접수-선발인원(과부족)
+      rate-string지원률
+      jeopsuSjdtm-string접수시작일자
+      jeopsuJrdtm-string접수종료일자
+      iyyjsijakYm-string입영시작월
+      iyyjjongryoYm-string입영종료월
+      ipyeongDe-string입영년월값}}
+   numOfRows-string한 페이지 결과 수
+   pageNo-string페이지번호
+   totalCount-string전체 결과 수}**
+
+# 예시
+
+<items>
+   <item>
+   <extremes>149</extremes>(접수-선발인원(과부족))
+   <gsteukgiCd>22</gsteukgiCd>(군사특기코드)
+   <gsteukgiNm>공병</gsteukgiNm>(군사특기명)
+ <gunGbnm>공군</gunGbnm>(군구분코드명)
+   <ipyeongDe>*</ipyeongDe>(입영년월값)
+   <iybudaeCdm>공군교육사령부</iybudaeCdm>(입영부대명)
+   <iyyjjongryoYm>202304</iyyjjongryoYm>(입영종료월)
+   <iyyjsijakYm>202304</iyyjsijakYm>(입영시작월)
+   <jeopsuJrdtm>20230105</jeopsuJrdtm>(접수종료일자)
+   <jeopsuPcnt>209</jeopsuPcnt>(접수인원수)
+   <jeopsuSjdtm>20221229</jeopsuSjdtm>(접수시작일자)
+   <mojipGbnm>전문기술병</mojipGbnm>(모집구분명)
+   <mojipTms>1</mojipTms>(모집횟수)
+   <mojipYy>2023</mojipYy>(모집년도)
+   <rate>3.5</rate>(지원률)
+   <rnum>6</rnum>(데이터번호)
+   <seonbalPcnt>60</seonbalPcnt>(선발인원수)
+   </item>
+</items>
