@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { User } from '@supabase/supabase-js';
+import { buildApiUrl } from '../../api/apiBaseUrl';
 import { Profile } from '../../components/common/ProfileSetupModal';
 import { supabase } from '../../api/supabaseClient';
 
@@ -8,8 +9,6 @@ interface PostWritePageProps {
   user: User | null;
   profile: Profile | null;
 }
-
-const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
 const CATEGORY_OPTIONS = [
   { value: 'general', label: '자유게시판' },
@@ -38,7 +37,7 @@ export const PostWritePage: React.FC<PostWritePageProps> = ({ user, profile }) =
   // 수정 모드: 기존 데이터 불러오기
   useEffect(() => {
     if (!isEditMode || !postId) return;
-    fetch(`${apiUrl}/api/v1/community/posts/${postId}`)
+    fetch(buildApiUrl(`/api/v1/community/posts/${postId}`))
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data) {
@@ -65,8 +64,8 @@ export const PostWritePage: React.FC<PostWritePageProps> = ({ user, profile }) =
 
       const payload = { title: title.trim(), content: content.trim(), category };
       const url = isEditMode
-        ? `${apiUrl}/api/v1/community/posts/${postId}`
-        : `${apiUrl}/api/v1/community/posts`;
+        ? buildApiUrl(`/api/v1/community/posts/${postId}`)
+        : buildApiUrl('/api/v1/community/posts');
       const method = isEditMode ? 'PUT' : 'POST';
 
       const res = await fetch(url, {

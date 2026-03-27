@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User } from '@supabase/supabase-js';
+import { buildApiUrl } from '../../api/apiBaseUrl';
 import { Profile } from '../../components/common/ProfileSetupModal';
 import { CATEGORIES, Post, PostListResponse, formatBoardDate } from './types';
 
@@ -11,7 +12,6 @@ interface CommunityPageProps {
 
 type SearchType = 'title' | 'title_content';
 
-const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 const PAGE_SIZE_OPTIONS = [30, 50, 100] as const;
 const PAGE_BLOCK_SIZE = 10;
 
@@ -78,7 +78,7 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({ user, profile }) =
         params.append('search_type', currentSearchType);
       }
 
-      const res = await fetch(`${apiUrl}/api/v1/community/posts?${params.toString()}`, {
+      const res = await fetch(`${buildApiUrl('/api/v1/community/posts')}?${params.toString()}`, {
         signal: controller.signal,
       });
 

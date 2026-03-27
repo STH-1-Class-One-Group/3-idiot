@@ -1,6 +1,5 @@
 import { supabase } from '../../api/supabaseClient';
-
-const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+import { buildApiUrl } from '../../api/apiBaseUrl';
 
 export interface NewsItemPayload {
   id?: string;
@@ -42,7 +41,7 @@ export const fetchNewsBatch = async (
     force_refresh: options?.forceRefresh ? 'true' : 'false',
   });
 
-  return fetch(`${apiUrl}/api/v1/news?${params.toString()}`, {
+  return fetch(`${buildApiUrl('/api/v1/news')}?${params.toString()}`, {
     signal: options?.signal,
     headers,
   });
@@ -60,7 +59,7 @@ export const fetchNewsDebug = async (
     force_refresh: options?.forceRefresh ? 'true' : 'false',
   });
 
-  return fetch(`${apiUrl}/api/v1/news/debug?${params.toString()}`, {
+  return fetch(`${buildApiUrl('/api/v1/news/debug')}?${params.toString()}`, {
     signal: options?.signal,
     headers,
   });
@@ -69,7 +68,7 @@ export const fetchNewsDebug = async (
 export const fetchNewsBookmarks = async (options?: { signal?: AbortSignal }) => {
   const headers = await getNewsRequestHeaders();
 
-  return fetch(`${apiUrl}/api/v1/news/bookmarks`, {
+  return fetch(buildApiUrl('/api/v1/news/bookmarks'), {
     signal: options?.signal,
     headers,
   });
@@ -81,7 +80,7 @@ export const createNewsBookmark = async (
 ) => {
   const headers = await getNewsRequestHeaders();
 
-  return fetch(`${apiUrl}/api/v1/news/bookmarks`, {
+  return fetch(buildApiUrl('/api/v1/news/bookmarks'), {
     method: 'POST',
     signal: options?.signal,
     headers: {
@@ -101,7 +100,7 @@ export const deleteNewsBookmark = async (
 ) => {
   const headers = await getNewsRequestHeaders();
 
-  return fetch(`${apiUrl}/api/v1/news/bookmarks/${encodeURIComponent(newsId)}`, {
+  return fetch(buildApiUrl(`/api/v1/news/bookmarks/${encodeURIComponent(newsId)}`), {
     method: 'DELETE',
     signal: options?.signal,
     headers,

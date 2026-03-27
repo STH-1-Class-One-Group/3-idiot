@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
+import { buildApiUrl } from '../../api/apiBaseUrl';
 import { SearchBar } from '../../components/common/SearchBar';
 import { CalendarPopup } from './components/CalendarPopup';
 
@@ -230,14 +231,12 @@ export const MealPage: React.FC = () => {
 
   const currentInfo = getDateInfo(baseDate, 0);
   const headerDateStr = `${baseDate.getFullYear()}. ${currentInfo.shortDate}`;
-  const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000';
-
   const fetchMealDayData = async (dateString: string, referenceDate: Date) => {
     const info = getDateInfo(referenceDate, getDayOffset(dateString, referenceDate));
     let finalData: MealApiRow[] = [];
 
     try {
-      const response = await fetch(`${apiUrl}/api/v1/meals/${dateString}`);
+      const response = await fetch(buildApiUrl(`/api/v1/meals/${dateString}`));
       if (!response.ok) {
         throw new Error('Failed to fetch meal day');
       }
@@ -296,7 +295,7 @@ export const MealPage: React.FC = () => {
     return () => {
       isMounted = false;
     };
-  }, [apiUrl, baseDate]);
+  }, [baseDate]);
 
   useEffect(() => {
     let isMounted = true;
@@ -306,7 +305,7 @@ export const MealPage: React.FC = () => {
       setSearchFeedback('');
 
       try {
-        const response = await fetch(`${apiUrl}/api/v1/meals`);
+        const response = await fetch(buildApiUrl('/api/v1/meals'));
         if (!response.ok) {
           throw new Error('Failed to fetch meal search index');
         }
@@ -400,7 +399,7 @@ export const MealPage: React.FC = () => {
     return () => {
       isMounted = false;
     };
-  }, [apiUrl]);
+  }, []);
 
   const renderMealBox = (mealCode: 'brst' | 'lnch' | 'dnr', parsed: ParsedMeal, isToday: boolean) => {
     let icon = '';

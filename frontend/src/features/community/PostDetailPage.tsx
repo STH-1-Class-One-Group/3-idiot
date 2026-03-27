@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { User } from '@supabase/supabase-js';
+import { buildApiUrl } from '../../api/apiBaseUrl';
 import { ProfileAvatar } from '../../components/common/ProfileAvatar';
 import { Profile } from '../../components/common/ProfileSetupModal';
 import { CommentSection } from './components/CommentSection';
@@ -12,8 +13,6 @@ interface PostDetailPageProps {
   profile: Profile | null;
 }
 
-const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000';
-
 export const PostDetailPage: React.FC<PostDetailPageProps> = ({ user, profile }) => {
   const { postId } = useParams<{ postId: string }>();
   const navigate = useNavigate();
@@ -23,7 +22,7 @@ export const PostDetailPage: React.FC<PostDetailPageProps> = ({ user, profile })
 
   useEffect(() => {
     if (!postId) return;
-    fetch(`${apiUrl}/api/v1/community/posts/${postId}`)
+    fetch(buildApiUrl(`/api/v1/community/posts/${postId}`))
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => setPost(data))
       .finally(() => setIsLoading(false));
@@ -42,7 +41,7 @@ export const PostDetailPage: React.FC<PostDetailPageProps> = ({ user, profile })
       const { data: { session } } = await supabase.auth.getSession();
       const token = session?.access_token;
       if (!token) return;
-      const res = await fetch(`${apiUrl}/api/v1/community/posts/${postId}`, {
+      const res = await fetch(buildApiUrl(`/api/v1/community/posts/${postId}`), {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });

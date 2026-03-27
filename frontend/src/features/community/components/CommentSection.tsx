@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { buildApiUrl } from '../../../api/apiBaseUrl';
 import { ProfileAvatar } from '../../../components/common/ProfileAvatar';
 import { Comment, formatRelativeTime } from '../types';
 import { Profile } from '../../../components/common/ProfileSetupModal';
@@ -9,8 +10,6 @@ interface CommentSectionProps {
   profile: Profile | null;
   currentUserId: string | null;
 }
-
-const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
 export const CommentSection: React.FC<CommentSectionProps> = ({ postId, profile, currentUserId }) => {
   const [comments, setComments] = useState<Comment[]>([]);
@@ -25,7 +24,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ postId, profile,
   const fetchComments = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch(`${apiUrl}/api/v1/community/posts/${postId}/comments`);
+      const res = await fetch(buildApiUrl(`/api/v1/community/posts/${postId}/comments`));
       if (res.ok) {
         const data = await res.json();
         setComments(data);
@@ -45,7 +44,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ postId, profile,
       const token = session?.access_token;
       if (!token) return;
 
-      const res = await fetch(`${apiUrl}/api/v1/community/posts/${postId}/comments`, {
+      const res = await fetch(buildApiUrl(`/api/v1/community/posts/${postId}/comments`), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ content: newComment.trim() }),
@@ -66,7 +65,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ postId, profile,
       const token = session?.access_token;
       if (!token) return;
 
-      await fetch(`${apiUrl}/api/v1/community/comments/${commentId}`, {
+      await fetch(buildApiUrl(`/api/v1/community/comments/${commentId}`), {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });

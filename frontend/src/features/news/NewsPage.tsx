@@ -10,6 +10,7 @@ import {
   fetchNewsBookmarks,
   NewsItemPayload,
 } from './newsApi';
+import { buildApiUrl } from '../../api/apiBaseUrl';
 
 interface NewsItem extends NewsItemPayload {
   id?: string;
@@ -584,7 +585,7 @@ export const NewsPage: React.FC = () => {
             renderNews.map((news) => {
               const proxyUrl =
                 news.thumbnail && news.thumbnail !== 'https://via.placeholder.com/300x200?text=No+Image'
-                  ? `${process.env.REACT_APP_API_URL || 'http://localhost:8000'}/api/v1/news/image?url=${encodeURIComponent(news.thumbnail)}`
+                  ? buildApiUrl(`/api/v1/news/image?url=${encodeURIComponent(news.thumbnail)}`)
                   : FALLBACK_THUMBNAIL;
               const bookmarkKey = getNewsKey(news);
               const isPending = pendingBookmarkKeys.has(bookmarkKey);
