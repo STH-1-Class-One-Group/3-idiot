@@ -43,7 +43,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         </div>
         
         <p className="text-sm text-on-surface-variant dark:text-slate-400 mb-8 text-center">
-          Modern Sentinel에 로그인하여 <br/>
+          짬밥요리사에 로그인하여 <br/>
           맞춤형 군 생활 관리 서비스를 이용해보세요.
         </p>
 
@@ -71,7 +71,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         </div>
 
         <div className="mt-8 text-center text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-          로그인 시 Modern Sentinel의{' '}
+          로그인 시 짬밥요리사의{' '}
           <Link to="/terms" onClick={onClose} className="underline hover:text-primary">
             이용약관
           </Link>

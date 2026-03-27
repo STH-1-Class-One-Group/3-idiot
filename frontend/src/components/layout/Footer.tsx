@@ -15,19 +15,19 @@ export const Footer: React.FC = () => {
             className="text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-300 transition-opacity opacity-80 hover:opacity-100 text-xs"
             to="/terms"
           >
-            Terms of Service
+            이용약관
           </Link>
           <Link
             className="text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-300 transition-opacity opacity-80 hover:opacity-100 text-xs"
             to="/privacy"
           >
-            Privacy Policy
+            개인정보처리방침
           </Link>
           <Link
             className="text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-300 transition-opacity opacity-80 hover:opacity-100 text-xs"
             to="/support"
           >
-            Support
+            고객지원
           </Link>
         </div>
       </div>

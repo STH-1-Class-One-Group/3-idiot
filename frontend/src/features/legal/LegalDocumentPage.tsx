@@ -7,18 +7,11 @@ type LegalSection = {
   bullets?: readonly string[];
 };
 
-type LegalMeta = {
-  label: string;
-  value: string;
-};
-
 interface LegalDocumentPageProps {
   eyebrow: string;
   title: string;
   description: string;
-  lastUpdated: string;
   sections: readonly LegalSection[];
-  meta: readonly LegalMeta[];
 }
 
 const quickLinks = [
@@ -31,9 +24,7 @@ export const LegalDocumentPage: React.FC<LegalDocumentPageProps> = ({
   eyebrow,
   title,
   description,
-  lastUpdated,
   sections,
-  meta,
 }) => {
   return (
     <div className="relative isolate">
@@ -57,7 +48,7 @@ export const LegalDocumentPage: React.FC<LegalDocumentPageProps> = ({
 
           <div className="rounded-3xl border border-slate-200/70 bg-slate-50/80 p-5 dark:border-slate-800 dark:bg-slate-950/60">
             <div className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
-              Quick Links
+              관련 문서
             </div>
             <div className="mt-4 space-y-2">
               {quickLinks.map((link) => (
@@ -75,40 +66,7 @@ export const LegalDocumentPage: React.FC<LegalDocumentPageProps> = ({
         </div>
       </section>
 
-      <section className="grid gap-8 lg:grid-cols-[280px_minmax(0,1fr)]">
-        <aside className="lg:sticky lg:top-32 lg:self-start">
-          <div className="rounded-[28px] border border-slate-200/70 bg-slate-50/90 p-6 dark:border-slate-800 dark:bg-slate-900/70">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
-              Document Info
-            </p>
-            <div className="mt-6 space-y-4">
-              <div className="rounded-2xl border border-slate-200/70 bg-white px-4 py-4 dark:border-slate-800 dark:bg-slate-950/70">
-                <div className="text-xs uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-                  Last Updated
-                </div>
-                <div className="mt-2 text-sm font-semibold text-slate-800 dark:text-slate-100">
-                  {lastUpdated}
-                </div>
-              </div>
-
-              {meta.map((item) => (
-                <div
-                  key={item.label}
-                  className="rounded-2xl border border-slate-200/70 bg-white px-4 py-4 dark:border-slate-800 dark:bg-slate-950/70"
-                >
-                  <div className="text-xs uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-                    {item.label}
-                  </div>
-                  <div className="mt-2 text-sm leading-6 text-slate-700 dark:text-slate-200">
-                    {item.value}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </aside>
-
-        <div className="space-y-5">
+      <section className="space-y-5">
           {sections.map((section, index) => (
             <article
               key={section.title}
@@ -141,7 +99,6 @@ export const LegalDocumentPage: React.FC<LegalDocumentPageProps> = ({
               </div>
             </article>
           ))}
-        </div>
       </section>
     </div>
   );
