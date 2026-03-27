@@ -166,8 +166,11 @@ export const ArmedReservePage: React.FC = () => {
           <TrainingCenterList
             centers={sortedCenters}
             isLoading={false}
-            onDetailClick={(center) => {
+            onPreviewClick={(center) => {
               setFocusedCenter(center);
+              setHighlightedCenterId(center.id);
+            }}
+            onDetailClick={(center) => {
               setModalCenter(center);
             }}
             highlightedCenterId={highlightedCenterId}

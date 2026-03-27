@@ -5,11 +5,18 @@ import { TrainingCenterCard } from './TrainingCenterCard';
 interface TrainingCenterListProps {
   centers: TrainingCenter[];
   isLoading: boolean;
+  onPreviewClick?: (center: TrainingCenter) => void;
   onDetailClick?: (center: TrainingCenter) => void;
   highlightedCenterId?: string | null;
 }
 
-export const TrainingCenterList: React.FC<TrainingCenterListProps> = ({ centers, isLoading, onDetailClick, highlightedCenterId }) => {
+export const TrainingCenterList: React.FC<TrainingCenterListProps> = ({
+  centers,
+  isLoading,
+  onPreviewClick,
+  onDetailClick,
+  highlightedCenterId,
+}) => {
   const listRef = useRef<HTMLDivElement>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -76,6 +83,7 @@ export const TrainingCenterList: React.FC<TrainingCenterListProps> = ({ centers,
             <TrainingCenterCard
               key={center.id}
               center={center}
+              onPreviewClick={onPreviewClick}
               onDetailClick={onDetailClick}
               isHighlighted={highlightedCenterId === center.id}
             />
