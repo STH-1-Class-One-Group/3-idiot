@@ -93,7 +93,7 @@ export const Header: React.FC<HeaderProps> = ({ user, profile, onSignOut }) => {
           </NavLink>
           <a
             className="font-['Inter'] text-sm tracking-tight text-slate-500 transition-colors hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-300"
-            href="#"
+            href="/recruitment"
           >
             모집정보
           </a>
