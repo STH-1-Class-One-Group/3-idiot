@@ -88,7 +88,7 @@ export const ArmedReservePage: React.FC = () => {
 
     for (const raw of filtered) {
       const resolved = await geocodeCenter(geocoder, raw);
-      if (resolved) results.push(resolved);
+      results.push(resolved ?? { ...raw, lat: 0, lng: 0 });
     }
 
     setCenters(results);
