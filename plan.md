@@ -267,3 +267,9 @@ SELECT * FROM food_items ORDER BY id ASC;
 /Recruitment : 병 모집 관련
 
 /Community : 커뮤니티 관련
+
+
+
+### 모병 모집 데이터 양식
+
+**header{description:headerresultCodestring결과코드resultMsgstring결과메시지}body{description:bodyitems{description:itemsitem{description:itemrnumstring데이터번호gunGbnmstring군구분코드명mojipGbnmstring모집구분명mojipYystring모집년도mojipTmsstring모집년도gsteukgiCdstring군사특기코드gsteukgiNmstring군사특기명iybudaeCdmstring입영부대명seonbalPcntstring선발인원수jeopsuPcntstring접수인원수extremesstring접수-선발인원(과부족)ratestring지원률jeopsuSjdtmstring접수시작일자jeopsuJrdtmstring접수종료일자iyyjsijakYmstring입영시작월iyyjjongryoYmstring입영종료월ipyeongDestring입영년월값}}numOfRowsstring한 페이지 결과 수pageNostring페이지번호totalCountstring전체 결과 수}**
