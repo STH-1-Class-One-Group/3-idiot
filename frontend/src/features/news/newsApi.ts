@@ -15,7 +15,7 @@ export interface NewsBookmark {
   createdAt: string;
 }
 
-const getNewsRequestHeaders = async (): Promise<HeadersInit> => {
+const getAuthenticatedNewsRequestHeaders = async (): Promise<HeadersInit> => {
   if (!hasSupabaseConfig) {
     return {};
   }
@@ -38,7 +38,6 @@ export const fetchNewsBatch = async (
   start: number,
   options?: { signal?: AbortSignal; forceRefresh?: boolean }
 ) => {
-  const headers = await getNewsRequestHeaders();
   const params = new URLSearchParams({
     limit: String(limit),
     start: String(start),
@@ -47,7 +46,6 @@ export const fetchNewsBatch = async (
 
   return fetch(`${buildApiUrl('/api/v1/news')}?${params.toString()}`, {
     signal: options?.signal,
-    headers,
   });
 };
 
@@ -56,7 +54,6 @@ export const fetchNewsDebug = async (
   start: number,
   options?: { signal?: AbortSignal; forceRefresh?: boolean }
 ) => {
-  const headers = await getNewsRequestHeaders();
   const params = new URLSearchParams({
     limit: String(limit),
     start: String(start),
@@ -65,12 +62,11 @@ export const fetchNewsDebug = async (
 
   return fetch(`${buildApiUrl('/api/v1/news/debug')}?${params.toString()}`, {
     signal: options?.signal,
-    headers,
   });
 };
 
 export const fetchNewsBookmarks = async (options?: { signal?: AbortSignal }) => {
-  const headers = await getNewsRequestHeaders();
+  const headers = await getAuthenticatedNewsRequestHeaders();
 
   return fetch(buildApiUrl('/api/v1/news/bookmarks'), {
     signal: options?.signal,
@@ -82,7 +78,7 @@ export const createNewsBookmark = async (
   news: NewsItemPayload,
   options?: { signal?: AbortSignal }
 ) => {
-  const headers = await getNewsRequestHeaders();
+  const headers = await getAuthenticatedNewsRequestHeaders();
 
   return fetch(buildApiUrl('/api/v1/news/bookmarks'), {
     method: 'POST',
@@ -102,7 +98,7 @@ export const deleteNewsBookmark = async (
   newsId: string,
   options?: { signal?: AbortSignal }
 ) => {
-  const headers = await getNewsRequestHeaders();
+  const headers = await getAuthenticatedNewsRequestHeaders();
 
   return fetch(buildApiUrl(`/api/v1/news/bookmarks/${encodeURIComponent(newsId)}`), {
     method: 'DELETE',

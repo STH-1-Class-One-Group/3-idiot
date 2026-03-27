@@ -100,13 +100,25 @@ def build_supabase_headers(user_authorization: Optional[str] = None) -> Optional
         return None
 
     if user_authorization and user_authorization.lower().startswith("bearer "):
-        if not settings.supabase_anon_key:
-            return None
-        return {
-            "apikey": settings.supabase_anon_key,
-            "Authorization": user_authorization,
-            "Content-Type": "application/json",
-        }
+        if settings.supabase_anon_key:
+            return {
+                "apikey": settings.supabase_anon_key,
+                "Authorization": user_authorization,
+                "Content-Type": "application/json",
+            }
+
+        token = settings.supabase_service_role_key
+        if token:
+            logger.warning(
+                "SUPABASE_ANON_KEY is missing. Falling back to service-role auth for a user-scoped request."
+            )
+            return {
+                "apikey": token,
+                "Authorization": f"Bearer {token}",
+                "Content-Type": "application/json",
+            }
+
+        return None
 
     token = settings.supabase_service_role_key or settings.supabase_anon_key
     if not token:
