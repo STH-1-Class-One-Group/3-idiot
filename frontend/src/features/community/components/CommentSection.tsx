@@ -77,14 +77,14 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ postId, profile,
   };
 
   return (
-    <section className="mt-12 bg-surface-container-lowest dark:bg-slate-800 rounded-xl p-8">
+    <section className="mt-10 rounded-xl bg-surface-container-lowest p-5 dark:bg-slate-800 sm:mt-12 sm:p-8">
       <h3 className="text-lg font-bold text-on-surface dark:text-white mb-6">
         댓글 <span className="text-primary">{comments.length}</span>
       </h3>
 
       {/* 댓글 입력 (로그인 + 프로필 있을 때만) */}
       {profile ? (
-        <form onSubmit={handleSubmit} className="flex gap-3 mb-8">
+        <form onSubmit={handleSubmit} className="mb-8 flex flex-col gap-3 sm:flex-row">
           {/* 아바타 */}
           <ProfileAvatar
             nickname={profile.nickname}
@@ -132,7 +132,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ postId, profile,
               ? `${comment.author.rank} ${comment.author.nickname}`
               : comment.author.nickname;
             return (
-              <div key={comment.id} className="flex gap-4">
+              <div key={comment.id} className="flex gap-3 sm:gap-4">
                 {/* 아바타 */}
                 <ProfileAvatar
                   nickname={comment.author.nickname}
@@ -143,8 +143,8 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ postId, profile,
                 />
                 {/* 내용 */}
                 <div className="flex-1">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex flex-wrap items-center gap-2">
                       <span className="font-bold text-sm text-on-surface dark:text-white">{authorLabel}</span>
                       <span className="text-xs text-on-surface-variant dark:text-slate-400">
                         {formatRelativeTime(comment.created_at)}

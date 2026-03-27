@@ -477,8 +477,8 @@ export const NewsPage: React.FC = () => {
 
   return (
     <div className="w-full">
-      <header className="mb-12 flex flex-col items-center justify-center space-y-4">
-        <h1 className="text-3xl font-extrabold tracking-tighter text-on-surface dark:text-white lg:text-4xl">
+      <header className="mb-10 flex flex-col items-center justify-center space-y-4 sm:mb-12">
+        <h1 className="text-center text-3xl font-extrabold tracking-tighter text-on-surface dark:text-white lg:text-4xl">
           국방 뉴스 <span className="text-primary dark:text-blue-400">아카이브</span>
         </h1>
         <p className="max-w-2xl text-center text-sm font-medium text-on-surface-variant dark:text-slate-400">
@@ -486,8 +486,8 @@ export const NewsPage: React.FC = () => {
         </p>
       </header>
 
-      <section className="mx-auto mb-10 max-w-3xl">
-        <div className="flex items-center gap-4">
+      <section className="mx-auto mb-8 max-w-3xl sm:mb-10">
+        <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:gap-4">
           <div className="flex-1">
             <SearchBar
               searchType="news"
@@ -515,7 +515,7 @@ export const NewsPage: React.FC = () => {
           </div>
           <button
             type="button"
-            className={`flex h-16 w-16 items-center justify-center rounded-full transition-all duration-200 active:scale-95 ${
+            className={`flex h-14 w-14 items-center justify-center self-end rounded-full transition-all duration-200 active:scale-95 sm:h-16 sm:w-16 sm:self-auto ${
               showBookmarksOnly
                 ? 'bg-primary text-on-primary'
                 : 'bg-surface-container-high text-primary hover:bg-surface-container-highest'
@@ -543,8 +543,8 @@ export const NewsPage: React.FC = () => {
         ) : null}
       </section>
 
-      <div className="rounded-xl border border-transparent bg-surface-container-lowest p-8 shadow-[0_12px_40px_rgba(27,28,28,0.06)] transition-all dark:border-slate-800 dark:bg-slate-900/50">
-        <div className="mb-8 flex items-center justify-between">
+      <div className="rounded-xl border border-transparent bg-surface-container-lowest p-5 shadow-[0_12px_40px_rgba(27,28,28,0.06)] transition-all dark:border-slate-800 dark:bg-slate-900/50 sm:p-6 lg:p-8">
+        <div className="mb-6 flex flex-col gap-3 sm:mb-8 sm:flex-row sm:items-center sm:justify-between">
           <h2 className="flex items-center gap-2 text-xl font-bold text-on-surface dark:text-white">
             <span
               className="material-symbols-outlined text-primary dark:text-blue-400"
@@ -554,7 +554,7 @@ export const NewsPage: React.FC = () => {
             </span>
             최신 뉴스
           </h2>
-          <div className="text-right">
+          <div className="text-left sm:text-right">
             <span className="text-sm font-medium text-on-surface-variant dark:text-slate-400">
               {showBookmarksOnly
                 ? `북마크 ${filteredNews.length}`
@@ -576,7 +576,7 @@ export const NewsPage: React.FC = () => {
         ) : null}
 
         <div
-          className={`grid grid-cols-1 items-start gap-6 sm:grid-cols-2 lg:grid-cols-4 ${
+          className={`grid grid-cols-1 items-start gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4 ${
             !shouldShowLoading && renderNews.length > 0 && renderNews.length <= 4 ? '' : 'min-h-[400px]'
           }`}
         >
@@ -675,7 +675,7 @@ export const NewsPage: React.FC = () => {
         ) : null}
 
         {filteredNews.length > 0 ? (
-          <div className="mt-12 flex items-center justify-center space-x-6">
+          <div className="mt-10 flex items-center justify-center gap-4 sm:mt-12 sm:space-x-6">
             <button
               onClick={handlePrevPage}
               disabled={currentPage === 1}

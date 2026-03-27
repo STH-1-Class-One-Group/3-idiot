@@ -182,13 +182,13 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 
   return (
     <div ref={searchRef} className="relative group w-full">
-      <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 sm:pl-5">
         <span className="material-symbols-outlined text-outline-variant group-focus-within:text-primary transition-colors" translate="no">
           search
         </span>
       </div>
       <input
-        className="block w-full pl-14 pr-16 py-4 bg-surface-container-lowest dark:bg-slate-800 border border-outline-variant/30 focus:border-primary focus:ring-4 focus:ring-primary/10 rounded-full text-sm font-medium placeholder:text-outline transition-all shadow-sm text-on-surface dark:text-white"
+        className="block w-full rounded-full border border-outline-variant/30 bg-surface-container-lowest py-3 pl-12 pr-14 text-sm font-medium text-on-surface shadow-sm transition-all placeholder:text-outline focus:border-primary focus:ring-4 focus:ring-primary/10 dark:bg-slate-800 dark:text-white sm:py-4 sm:pl-14 sm:pr-16"
         placeholder={placeholder || DEFAULT_PLACEHOLDERS[searchType]}
         type="text"
         value={query}
@@ -201,7 +201,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
       />
       <button
         type="button"
-        className="absolute inset-y-2 right-2 px-4 flex items-center justify-center bg-primary text-on-primary rounded-full hover:bg-on-primary-fixed-variant transition-colors"
+        className="absolute inset-y-1.5 right-1.5 flex items-center justify-center rounded-full bg-primary px-3 text-on-primary transition-colors hover:bg-on-primary-fixed-variant sm:inset-y-2 sm:right-2 sm:px-4"
         onClick={() => {
           if (results.length > 0) {
             handleSelect(results[0]);

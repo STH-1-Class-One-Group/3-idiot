@@ -469,7 +469,7 @@ export const MealPage: React.FC = () => {
 
   return (
     <div className="w-full">
-      <div className="mx-auto mb-10 max-w-2xl">
+      <div className="mx-auto mb-8 max-w-2xl sm:mb-10">
         <SearchBar
           searchType="food"
           placeholder="메뉴명을 검색하면 관련 식단 5개를 추천합니다"
@@ -513,8 +513,8 @@ export const MealPage: React.FC = () => {
         </div>
       </div>
 
-      <header className="mb-12 flex flex-col items-center justify-center space-y-6">
-        <div className="flex items-center space-x-8 rounded-full border border-transparent bg-surface-container-lowest px-6 py-3 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <header className="mb-10 flex flex-col items-center justify-center space-y-5 sm:mb-12 sm:space-y-6">
+        <div className="flex w-full max-w-3xl items-center justify-between gap-2 rounded-[28px] border border-transparent bg-surface-container-lowest px-3 py-3 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:w-auto sm:justify-center sm:space-x-8 sm:gap-0 sm:px-6">
           <button
             className="material-symbols-outlined rounded-full p-2 text-primary transition-all active:scale-90 hover:bg-surface-container-low dark:text-blue-400 dark:hover:bg-slate-800"
             translate="no"
@@ -522,8 +522,8 @@ export const MealPage: React.FC = () => {
           >
             arrow_back
           </button>
-          <button className="group flex items-center space-x-3 focus:outline-none" onClick={() => setIsCalendarOpen(true)}>
-            <span className="text-2xl font-bold tracking-tight text-on-surface dark:text-white">{headerDateStr}</span>
+          <button className="group flex min-w-0 flex-1 items-center justify-center space-x-2 text-center focus:outline-none sm:flex-initial sm:space-x-3" onClick={() => setIsCalendarOpen(true)}>
+            <span className="truncate text-lg font-bold tracking-tight text-on-surface dark:text-white sm:text-2xl">{headerDateStr}</span>
             <span className="material-symbols-outlined text-primary transition-transform group-hover:translate-y-0.5 dark:text-blue-400" translate="no">
               calendar_month
             </span>
@@ -544,14 +544,14 @@ export const MealPage: React.FC = () => {
           <span className="text-on-surface-variant dark:text-slate-400">식단 정보를 불러오는 중입니다...</span>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:gap-8">
           {mealDays.map((dayData) => {
             const isToday = dayData.isToday;
 
             return (
               <section
                 key={dayData.apiDate}
-                className={`relative space-y-6 transition-opacity ${!isToday ? 'opacity-80 md:opacity-60 hover:opacity-100' : ''}`}
+                className={`relative space-y-5 transition-opacity sm:space-y-6 ${!isToday ? 'opacity-90 lg:opacity-60 hover:opacity-100' : ''}`}
               >
                 {isToday ? (
                   <div className="pointer-events-none absolute -inset-4 hidden rounded-3xl border-2 border-primary/20 dark:border-blue-400/20 md:block" />

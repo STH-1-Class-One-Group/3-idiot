@@ -187,7 +187,7 @@ const App: React.FC = () => {
       <BrowserRouter>
         <div className="min-h-screen flex flex-col bg-surface dark:bg-slate-950 transition-colors">
           <Header user={user} profile={profile ?? null} onSignOut={handleSignOut} />
-          <main className="flex-grow pt-32 pb-20 px-6 max-w-7xl mx-auto w-full">
+          <main className="mx-auto w-full max-w-7xl flex-grow px-4 pb-14 pt-24 sm:px-6 sm:pb-16 sm:pt-28 lg:px-8 lg:pb-20 lg:pt-32">
             <Routes>
               <Route path="/" element={<ShopPage />} />
               <Route path="/Dashboard" element={<DashboardPage />} />

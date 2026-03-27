@@ -235,25 +235,25 @@ export const DashboardPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-16 w-full">
+    <div className="w-full space-y-10 sm:space-y-12 lg:space-y-16">
       <section className="relative">
         <div className="max-w-3xl">
-          <h1 className="text-[3.5rem] font-extrabold tracking-tighter leading-tight text-on-surface dark:text-white mb-6">
+          <h1 className="mb-5 text-4xl font-extrabold leading-tight tracking-tighter text-on-surface dark:text-white sm:text-5xl lg:mb-6 lg:text-[3.5rem]">
             Military Life
             <br />
             <span className="text-primary dark:text-blue-400">Integrated Briefing.</span>
           </h1>
-          <p className="text-on-surface-variant dark:text-slate-400 text-lg leading-relaxed max-w-3xl flex flex-col">
+          <p className="flex max-w-3xl flex-col text-base leading-relaxed text-on-surface-variant dark:text-slate-400 sm:text-lg">
             <span>Schedules, meals, and defense news are surfaced from one dashboard.</span>
             <span>Loaded items appear as soon as they arrive.</span>
           </p>
         </div>
-        <div className="absolute -top-10 -right-20 w-96 h-96 signature-gradient opacity-10 rounded-full blur-[100px] -z-10"></div>
+        <div className="absolute -right-6 top-0 -z-10 h-48 w-48 rounded-full signature-gradient opacity-10 blur-[72px] sm:-right-12 sm:-top-6 sm:h-72 sm:w-72 lg:-right-20 lg:-top-10 lg:h-96 lg:w-96 lg:blur-[100px]"></div>
       </section>
 
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
-        <div className="md:col-span-8 bg-surface-container-lowest dark:bg-slate-900/50 p-8 rounded-xl shadow-[0_12px_40px_rgba(27,28,28,0.06)] flex flex-col justify-between space-y-8 border border-transparent dark:border-slate-800 transition-all">
-          <div className="flex justify-between items-start">
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-12 lg:gap-8">
+        <div className="flex flex-col justify-between space-y-6 rounded-xl border border-transparent bg-surface-container-lowest p-5 shadow-[0_12px_40px_rgba(27,28,28,0.06)] transition-all dark:border-slate-800 dark:bg-slate-900/50 sm:p-6 md:col-span-7 lg:col-span-8 lg:space-y-8 lg:p-8">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <span className="text-xs font-bold text-primary dark:text-blue-400 tracking-widest uppercase mb-2 block">Personnel Status</span>
               <h2 className="text-2xl font-bold text-on-surface dark:text-white">Discharge Calculator</h2>
@@ -264,8 +264,8 @@ export const DashboardPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="space-y-6">
-            <div className="flex flex-col md:flex-row gap-4">
+          <div className="space-y-5 sm:space-y-6">
+            <div className="flex flex-col gap-4 md:flex-row">
               <div className="flex-1 space-y-2">
                 <label className="text-xs font-medium text-on-surface-variant dark:text-slate-400 ml-1">Enlistment</label>
                 <input className="w-full bg-surface-container-low dark:bg-slate-800 border-none rounded-lg py-3 px-4 focus:ring-1 focus:ring-primary text-on-surface dark:text-white text-sm" type="text" defaultValue="2023. 05. 08" readOnly />
@@ -277,9 +277,9 @@ export const DashboardPage: React.FC = () => {
             </div>
 
             <div className="space-y-3">
-              <div className="flex justify-between items-end">
+              <div className="flex items-end justify-between gap-4">
                 <span className="text-sm font-medium text-on-surface-variant dark:text-slate-400">Progress</span>
-                <span className="text-4xl font-extrabold text-primary dark:text-blue-400 tracking-tighter">68.4<span className="text-xl">%</span></span>
+                <span className="text-3xl font-extrabold tracking-tighter text-primary dark:text-blue-400 sm:text-4xl">68.4<span className="text-lg sm:text-xl">%</span></span>
               </div>
               <div className="w-full h-3 bg-surface-container-low dark:bg-slate-800 rounded-full overflow-hidden">
                 <div className="h-full signature-gradient rounded-full" style={{ width: '68.4%' }}></div>
@@ -288,7 +288,7 @@ export const DashboardPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="md:col-span-4 bg-surface-container-lowest dark:bg-slate-900/50 p-8 rounded-xl shadow-[0_12px_40px_rgba(27,28,28,0.06)] border border-transparent dark:border-slate-800 transition-all">
+        <div className="rounded-xl border border-transparent bg-surface-container-lowest p-5 shadow-[0_12px_40px_rgba(27,28,28,0.06)] transition-all dark:border-slate-800 dark:bg-slate-900/50 sm:p-6 md:col-span-5 lg:col-span-4 lg:p-8">
           <div className="flex items-center gap-3 mb-8">
             <span className="material-symbols-outlined text-primary dark:text-blue-400 bg-primary-fixed dark:bg-blue-900/40 p-2 rounded-lg" translate="no">military_tech</span>
             <h2 className="text-xl font-bold text-on-surface dark:text-white">Reservist Status</h2>
@@ -313,33 +313,33 @@ export const DashboardPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="md:col-span-4 bg-surface-container-low dark:bg-slate-900/50 p-8 rounded-xl flex flex-col border border-transparent dark:border-slate-800 transition-all">
-          <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col rounded-xl border border-transparent bg-surface-container-low p-5 transition-all dark:border-slate-800 dark:bg-slate-900/50 sm:p-6 md:col-span-5 lg:col-span-4 lg:p-8">
+          <div className="mb-6 flex items-center justify-between sm:mb-8">
             <h2 className="text-xl font-bold text-on-surface dark:text-white">Today's Meals</h2>
           </div>
           <div className="space-y-4">
-            <div className="flex items-center justify-between cursor-pointer group hover:bg-surface-variant/30 p-2 rounded-lg transition-colors -mx-2" onClick={() => handleMealClick('Breakfast', fullMealData.breakfastItems)}>
-              <div className="flex items-center gap-4">
-                <span className="text-xs font-bold text-primary dark:text-blue-400 w-16">Breakfast</span>
-                <p className="text-sm text-on-surface dark:text-slate-200 break-all group-hover:text-primary dark:group-hover:text-blue-400 transition-colors">{mealInfo.breakfast}</p>
+            <div className="group -mx-2 flex cursor-pointer items-start justify-between rounded-lg p-2 transition-colors hover:bg-surface-variant/30" onClick={() => handleMealClick('Breakfast', fullMealData.breakfastItems)}>
+              <div className="flex min-w-0 items-start gap-3 sm:gap-4">
+                <span className="w-16 shrink-0 text-xs font-bold text-primary dark:text-blue-400">Breakfast</span>
+                <p className="text-sm text-on-surface transition-colors group-hover:text-primary dark:text-slate-200 dark:group-hover:text-blue-400">{mealInfo.breakfast}</p>
               </div>
               <button className="text-on-surface-variant dark:text-slate-400 group-hover:text-primary dark:group-hover:text-blue-400 transition-colors flex">
                 <span className="material-symbols-outlined text-lg" translate="no">chevron_right</span>
               </button>
             </div>
-            <div className="flex items-center justify-between py-3 border-y border-outline-variant/15 dark:border-slate-800 cursor-pointer group hover:bg-surface-variant/30 p-2 rounded-lg transition-colors -mx-2" onClick={() => handleMealClick('Lunch', fullMealData.lunchItems)}>
-              <div className="flex items-center gap-4">
-                <span className="text-xs font-bold text-primary dark:text-blue-400 w-16">Lunch</span>
-                <p className="text-sm text-on-surface dark:text-slate-200 break-all group-hover:text-primary dark:group-hover:text-blue-400 transition-colors">{mealInfo.lunch}</p>
+            <div className="group -mx-2 flex cursor-pointer items-start justify-between rounded-lg border-y border-outline-variant/15 p-2 py-3 transition-colors hover:bg-surface-variant/30 dark:border-slate-800" onClick={() => handleMealClick('Lunch', fullMealData.lunchItems)}>
+              <div className="flex min-w-0 items-start gap-3 sm:gap-4">
+                <span className="w-16 shrink-0 text-xs font-bold text-primary dark:text-blue-400">Lunch</span>
+                <p className="text-sm text-on-surface transition-colors group-hover:text-primary dark:text-slate-200 dark:group-hover:text-blue-400">{mealInfo.lunch}</p>
               </div>
               <button className="text-on-surface-variant dark:text-slate-400 group-hover:text-primary dark:group-hover:text-blue-400 transition-colors flex">
                 <span className="material-symbols-outlined text-lg" translate="no">chevron_right</span>
               </button>
             </div>
-            <div className="flex items-center justify-between cursor-pointer group hover:bg-surface-variant/30 p-2 rounded-lg transition-colors -mx-2" onClick={() => handleMealClick('Dinner', fullMealData.dinnerItems)}>
-              <div className="flex items-center gap-4">
-                <span className="text-xs font-bold text-primary dark:text-blue-400 w-16">Dinner</span>
-                <p className="text-sm text-on-surface dark:text-slate-200 break-all group-hover:text-primary dark:group-hover:text-blue-400 transition-colors">{mealInfo.dinner}</p>
+            <div className="group -mx-2 flex cursor-pointer items-start justify-between rounded-lg p-2 transition-colors hover:bg-surface-variant/30" onClick={() => handleMealClick('Dinner', fullMealData.dinnerItems)}>
+              <div className="flex min-w-0 items-start gap-3 sm:gap-4">
+                <span className="w-16 shrink-0 text-xs font-bold text-primary dark:text-blue-400">Dinner</span>
+                <p className="text-sm text-on-surface transition-colors group-hover:text-primary dark:text-slate-200 dark:group-hover:text-blue-400">{mealInfo.dinner}</p>
               </div>
               <button className="text-on-surface-variant dark:text-slate-400 group-hover:text-primary dark:group-hover:text-blue-400 transition-colors flex">
                 <span className="material-symbols-outlined text-lg" translate="no">chevron_right</span>
@@ -351,14 +351,14 @@ export const DashboardPage: React.FC = () => {
           </button>
         </div>
 
-        <div className="md:col-span-8 bg-surface-container-lowest dark:bg-slate-900/50 p-8 rounded-xl shadow-[0_12px_40px_rgba(27,28,28,0.06)] border border-transparent dark:border-slate-800 transition-all">
-          <div className="flex items-center justify-between mb-8">
+        <div className="rounded-xl border border-transparent bg-surface-container-lowest p-5 shadow-[0_12px_40px_rgba(27,28,28,0.06)] transition-all dark:border-slate-800 dark:bg-slate-900/50 sm:p-6 md:col-span-7 lg:col-span-8 lg:p-8">
+          <div className="mb-6 flex items-center justify-between sm:mb-8">
             <h2 className="text-xl font-bold text-on-surface dark:text-white">Defense News</h2>
             <button onClick={() => navigate('/News')} className="text-xs font-bold text-on-surface-variant dark:text-slate-400 hover:text-primary dark:hover:text-blue-400">
               View all
             </button>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6">
             {newsList.length > 0 ? (
               newsList.map((news, idx) => (
                 <div key={news.link || idx} className="group cursor-pointer" onClick={() => window.open(news.link, '_blank')}>

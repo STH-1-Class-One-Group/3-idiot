@@ -146,7 +146,7 @@ export const RecruitmentPage: React.FC = () => {
 
   return (
     <div className="w-full">
-      <section className="relative overflow-hidden rounded-[32px] bg-[radial-gradient(circle_at_top_left,_rgba(37,99,235,0.22),_transparent_34%),linear-gradient(135deg,#f8fbff_0%,#eef4ff_44%,#ffffff_100%)] px-6 py-10 shadow-[0_24px_80px_rgba(30,64,175,0.12)] ring-1 ring-blue-100 md:px-10 lg:px-12 lg:py-14 dark:bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.26),_transparent_28%),linear-gradient(135deg,#0f172a_0%,#172554_48%,#0f172a_100%)] dark:ring-blue-900/60">
+      <section className="relative overflow-hidden rounded-[28px] bg-[radial-gradient(circle_at_top_left,_rgba(37,99,235,0.22),_transparent_34%),linear-gradient(135deg,#f8fbff_0%,#eef4ff_44%,#ffffff_100%)] px-5 py-8 shadow-[0_24px_80px_rgba(30,64,175,0.12)] ring-1 ring-blue-100 sm:px-6 md:px-10 lg:rounded-[32px] lg:px-12 lg:py-14 dark:bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.26),_transparent_28%),linear-gradient(135deg,#0f172a_0%,#172554_48%,#0f172a_100%)] dark:ring-blue-900/60">
         <div className="absolute -right-16 top-10 h-40 w-40 rounded-full bg-blue-200/45 blur-3xl dark:bg-blue-500/20" />
         <div className="absolute bottom-0 left-0 h-48 w-48 rounded-full bg-cyan-200/40 blur-3xl dark:bg-cyan-400/10" />
 
@@ -155,7 +155,7 @@ export const RecruitmentPage: React.FC = () => {
             <p className="mb-3 text-sm font-semibold uppercase tracking-[0.32em] text-blue-700 dark:text-blue-300">
               Recruitment
             </p>
-            <h1 className="text-4xl font-black tracking-tight text-slate-950 lg:text-6xl dark:text-white">
+            <h1 className="text-3xl font-black tracking-tight text-slate-950 sm:text-4xl lg:text-6xl dark:text-white">
               모병 모집
             </h1>
             <p className="mt-4 max-w-2xl text-base leading-7 text-slate-600 lg:text-lg dark:text-slate-300">
@@ -254,7 +254,7 @@ export const RecruitmentPage: React.FC = () => {
         </div>
       </section>
 
-      <section className="mt-12 rounded-[30px] bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)] ring-1 ring-slate-100 md:p-8 dark:bg-slate-950 dark:ring-slate-900">
+      <section className="mt-10 rounded-[28px] bg-white p-5 shadow-[0_18px_60px_rgba(15,23,42,0.06)] ring-1 ring-slate-100 sm:mt-12 sm:p-6 md:p-8 dark:bg-slate-950 dark:ring-slate-900">
         <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.28em] text-blue-600 dark:text-blue-300">
@@ -285,11 +285,11 @@ export const RecruitmentPage: React.FC = () => {
 
         {!isLoading && !errorMessage ? (
           <>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 xl:grid-cols-4">
               {visibleNotices.map((notice) => (
                 <article
                   key={notice.id}
-                  className="flex min-h-[370px] flex-col rounded-[26px] border border-slate-100 bg-slate-50 p-5 shadow-sm transition-all hover:-translate-y-1 hover:shadow-[0_22px_50px_rgba(37,99,235,0.12)] dark:border-slate-800 dark:bg-slate-900"
+                  className="flex min-h-0 flex-col rounded-[26px] border border-slate-100 bg-slate-50 p-5 shadow-sm transition-all hover:-translate-y-1 hover:shadow-[0_22px_50px_rgba(37,99,235,0.12)] dark:border-slate-800 dark:bg-slate-900"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex flex-wrap gap-2">
@@ -426,7 +426,7 @@ export const RecruitmentPage: React.FC = () => {
         ) : null}
       </section>
 
-      <section className="mt-12 rounded-[30px] bg-[linear-gradient(135deg,#eff6ff_0%,#ffffff_52%,#ecfeff_100%)] p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)] ring-1 ring-slate-100 md:p-8 dark:bg-[linear-gradient(135deg,#0f172a_0%,#111827_52%,#082f49_100%)] dark:ring-slate-900">
+      <section className="mt-10 rounded-[28px] bg-[linear-gradient(135deg,#eff6ff_0%,#ffffff_52%,#ecfeff_100%)] p-5 shadow-[0_18px_60px_rgba(15,23,42,0.06)] ring-1 ring-slate-100 sm:mt-12 sm:p-6 md:p-8 dark:bg-[linear-gradient(135deg,#0f172a_0%,#111827_52%,#082f49_100%)] dark:ring-slate-900">
         <div className="mb-8 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.28em] text-blue-600 dark:text-blue-300">

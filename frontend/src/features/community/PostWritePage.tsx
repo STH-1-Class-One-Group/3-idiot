@@ -91,22 +91,22 @@ export const PostWritePage: React.FC<PostWritePageProps> = ({ user, profile }) =
   };
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="mx-auto max-w-4xl">
       {/* 헤더 */}
-      <div className="mb-10">
+      <div className="mb-8 sm:mb-10">
         <span className="text-primary font-semibold tracking-wider text-sm mb-3 block">
           {isEditMode ? 'EDIT POST' : 'NEW POST'}
         </span>
-        <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-on-surface dark:text-white">
+        <h1 className="text-3xl font-bold tracking-tight text-on-surface dark:text-white sm:text-4xl md:text-5xl">
           {isEditMode ? '게시글 수정' : <>새로운 소식을 <span className="text-primary">커뮤니티</span>에 공유하세요</>}
         </h1>
       </div>
 
       {/* 폼 */}
-      <div className="bg-surface-container-low dark:bg-slate-900 rounded-xl p-1 md:p-8">
+      <div className="rounded-xl bg-surface-container-low p-1 dark:bg-slate-900 md:p-8">
         <form
           onSubmit={handleSubmit}
-          className="bg-surface-container-lowest dark:bg-slate-800 rounded-xl p-8 shadow-[0_12px_40px_rgba(27,28,28,0.06)] space-y-6"
+          className="space-y-6 rounded-xl bg-surface-container-lowest p-5 shadow-[0_12px_40px_rgba(27,28,28,0.06)] dark:bg-slate-800 sm:p-6 md:p-8"
         >
           {/* 카테고리 */}
           <div>
@@ -160,18 +160,18 @@ export const PostWritePage: React.FC<PostWritePageProps> = ({ user, profile }) =
           )}
 
           {/* 버튼 */}
-          <div className="flex flex-col md:flex-row items-center justify-end gap-4">
+          <div className="flex flex-col items-stretch justify-end gap-4 sm:flex-row sm:items-center">
             <button
               type="button"
               onClick={() => navigate(-1)}
-              className="bg-surface-container-high dark:bg-slate-700 text-on-surface dark:text-white font-semibold rounded-full px-10 py-4 hover:bg-surface-container-highest dark:hover:bg-slate-600 transition-colors"
+              className="rounded-full bg-surface-container-high px-8 py-4 font-semibold text-on-surface transition-colors hover:bg-surface-container-highest dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600 sm:px-10"
             >
               취소
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="bg-gradient-to-br from-primary to-primary-container text-white px-16 py-4 font-bold rounded-full shadow-lg shadow-primary/20 hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+              className="rounded-full bg-gradient-to-br from-primary to-primary-container px-10 py-4 font-bold text-white shadow-lg shadow-primary/20 transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 sm:px-16"
             >
               {isSubmitting ? '저장 중...' : isEditMode ? '수정 완료' : '등록하기'}
             </button>

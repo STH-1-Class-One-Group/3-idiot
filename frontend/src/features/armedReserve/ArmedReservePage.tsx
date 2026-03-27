@@ -106,12 +106,12 @@ export const ArmedReservePage: React.FC = () => {
 
   return (
     <div className="w-full">
-      <header className="mb-12 flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
+      <header className="mb-10 flex flex-col justify-between gap-5 sm:mb-12 sm:gap-6 lg:flex-row lg:items-end">
         <div>
           <p className="mb-3 text-sm font-semibold uppercase tracking-[0.3em] text-primary dark:text-blue-400">
             Armed Reserve
           </p>
-          <h1 className="text-4xl font-extrabold tracking-tighter text-on-surface dark:text-white lg:text-6xl">
+          <h1 className="text-3xl font-extrabold tracking-tighter text-on-surface dark:text-white sm:text-4xl lg:text-6xl">
             예비군 정보 서비스
           </h1>
           <p className="mt-3 max-w-2xl text-base text-on-surface-variant dark:text-slate-400 lg:text-lg">
@@ -121,7 +121,7 @@ export const ArmedReservePage: React.FC = () => {
 
         <button
           type="button"
-          className="inline-flex items-center gap-3 self-start rounded-xl border border-outline-variant/15 bg-surface-container-lowest px-6 py-4 text-lg font-bold text-primary shadow-[0_12px_40px_rgba(27,28,28,0.06)] transition-colors hover:bg-surface-bright dark:border-slate-800 dark:bg-slate-900 dark:text-blue-400"
+          className="inline-flex w-full items-center justify-center gap-3 self-start rounded-xl border border-outline-variant/15 bg-surface-container-lowest px-6 py-4 text-base font-bold text-primary shadow-[0_12px_40px_rgba(27,28,28,0.06)] transition-colors hover:bg-surface-bright dark:border-slate-800 dark:bg-slate-900 dark:text-blue-400 sm:w-auto sm:text-lg"
         >
           <span
             className="material-symbols-outlined"
@@ -134,9 +134,9 @@ export const ArmedReservePage: React.FC = () => {
         </button>
       </header>
 
-      <section className="grid grid-cols-12 gap-8">
+      <section className="grid grid-cols-12 gap-5 sm:gap-6 lg:gap-8">
         <div className="col-span-12 lg:col-span-8">
-          <div className="relative aspect-[16/9] overflow-hidden rounded-2xl border border-outline-variant/10 bg-surface-container-low shadow-sm">
+          <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-outline-variant/10 bg-surface-container-low shadow-sm sm:aspect-[16/10] lg:aspect-[16/9]">
             <img
               src={MAP_IMAGE_URL}
               alt="서울 예비군 훈련장 지도"
@@ -157,7 +157,7 @@ export const ArmedReservePage: React.FC = () => {
                   onClick={() => setSelectedId(center.id)}
                 >
                   <div
-                    className={`mb-1 rounded-full px-3 py-1 text-xs font-bold shadow-lg transition-transform ${
+                    className={`mb-1 rounded-full px-2.5 py-1 text-[11px] font-bold shadow-lg transition-transform sm:px-3 sm:text-xs ${
                       isSelected
                         ? 'scale-100 bg-white text-on-surface dark:bg-slate-950 dark:text-white'
                         : 'scale-95 bg-surface-container-lowest/90 text-on-surface-variant dark:bg-slate-900/90 dark:text-slate-200'
@@ -178,7 +178,7 @@ export const ArmedReservePage: React.FC = () => {
               );
             })}
 
-            <div className="absolute bottom-6 left-6 right-6 rounded-2xl border border-white/30 bg-white/85 p-5 shadow-xl backdrop-blur dark:border-slate-700/60 dark:bg-slate-900/85">
+            <div className="absolute bottom-3 left-3 right-3 rounded-2xl border border-white/30 bg-white/85 p-4 shadow-xl backdrop-blur dark:border-slate-700/60 dark:bg-slate-900/85 sm:bottom-4 sm:left-4 sm:right-4 sm:p-5 lg:bottom-6 lg:left-6 lg:right-6">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                 <div>
                   <div className="mb-2 flex items-center gap-3">
@@ -202,7 +202,7 @@ export const ArmedReservePage: React.FC = () => {
                   </p>
                 </div>
 
-                <div className="flex gap-3">
+                  <div className="flex flex-col gap-3 sm:flex-row">
                   <button
                     type="button"
                     className="rounded-full bg-surface-container-high px-5 py-3 text-sm font-bold text-on-surface transition-colors hover:bg-surface-dim dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700"
@@ -219,10 +219,10 @@ export const ArmedReservePage: React.FC = () => {
               </div>
             </div>
 
-            <div className="absolute right-6 top-6 flex flex-col gap-2">
+            <div className="absolute right-3 top-3 flex flex-col gap-2 sm:right-4 sm:top-4 lg:right-6 lg:top-6">
               <button
                 type="button"
-                className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-on-surface shadow-lg transition-colors hover:bg-surface-bright dark:bg-slate-900 dark:text-white dark:hover:bg-slate-800"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-on-surface shadow-lg transition-colors hover:bg-surface-bright dark:bg-slate-900 dark:text-white dark:hover:bg-slate-800 sm:h-11 sm:w-11"
               >
                 <span className="material-symbols-outlined" translate="no">
                   add
@@ -230,7 +230,7 @@ export const ArmedReservePage: React.FC = () => {
               </button>
               <button
                 type="button"
-                className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-on-surface shadow-lg transition-colors hover:bg-surface-bright dark:bg-slate-900 dark:text-white dark:hover:bg-slate-800"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-on-surface shadow-lg transition-colors hover:bg-surface-bright dark:bg-slate-900 dark:text-white dark:hover:bg-slate-800 sm:h-11 sm:w-11"
               >
                 <span className="material-symbols-outlined" translate="no">
                   remove
@@ -240,7 +240,7 @@ export const ArmedReservePage: React.FC = () => {
           </div>
         </div>
 
-        <aside className="col-span-12 space-y-6 lg:col-span-4">
+        <aside className="col-span-12 space-y-5 lg:col-span-4 lg:space-y-6">
           <div className="flex items-center justify-between">
             <h3 className="text-2xl font-bold tracking-tight text-on-surface dark:text-white">
               주변 예비군 목록

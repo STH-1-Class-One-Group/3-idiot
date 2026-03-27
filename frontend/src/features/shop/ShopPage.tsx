@@ -30,7 +30,7 @@ export const ShopPage: React.FC = () => {
 
   return (
     <>
-      <section className="max-w-2xl mx-auto mb-16 px-4">
+      <section className="mx-auto mb-10 max-w-2xl px-0 sm:mb-14">
         <SearchBar
           searchType="food"
           placeholder="찾으시는 식품이나 상품명을 입력하세요"
@@ -40,18 +40,18 @@ export const ShopPage: React.FC = () => {
         />
       </section>
 
-      <section className="mb-12 text-center">
+      <section className="mb-10 text-center sm:mb-12">
         <div className="max-w-3xl mx-auto">
-          <h1 className="text-5xl font-extrabold tracking-tighter mb-4 text-on-surface dark:text-white">
+          <h1 className="mb-4 text-3xl font-extrabold tracking-tighter text-on-surface dark:text-white sm:text-4xl lg:text-5xl">
             밀리터리 푸드 & 군것질 보관함
           </h1>
-          <p className="text-on-surface-variant dark:text-slate-400 text-lg leading-relaxed">
+          <p className="text-base leading-relaxed text-on-surface-variant dark:text-slate-400 sm:text-lg">
             엄격한 기준을 통과한 고품질 군용 식품들을 만나보세요. 모든 품목은 현지 직송으로 공수되어 최상의 상태를 유지합니다.
           </p>
         </div>
       </section>
 
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+      <section className="mb-12 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4 lg:gap-8">
         {selectedProduct ? (
           <ProductCard key={selectedProduct.id} product={selectedProduct} />
         ) : error ? (
@@ -78,21 +78,21 @@ export const ShopPage: React.FC = () => {
       )}
 
       {!selectedProduct && totalPages > 0 && (
-        <section className="flex justify-center items-center gap-6 mt-8">
+        <section className="mt-8 flex items-center justify-center gap-4 sm:gap-6">
           <button
             onClick={handlePrevPage}
             disabled={page === 1}
-            className={`flex items-center justify-center w-10 h-10 rounded-full transition-colors ${page === 1 ? 'text-outline-variant cursor-not-allowed' : 'hover:bg-surface-container-high dark:hover:bg-slate-800 text-on-surface-variant dark:text-slate-400'}`}
+            className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors ${page === 1 ? 'cursor-not-allowed text-outline-variant' : 'text-on-surface-variant hover:bg-surface-container-high dark:text-slate-400 dark:hover:bg-slate-800'}`}
           >
             <span className="material-symbols-outlined" translate="no">chevron_left</span>
           </button>
-          <div className="text-sm font-medium tracking-widest text-on-surface-variant dark:text-slate-400">
+          <div className="text-xs font-medium tracking-[0.24em] text-on-surface-variant dark:text-slate-400 sm:text-sm">
             {page} <span className="mx-2 text-outline-variant dark:text-slate-600">/</span> {totalPages}
           </div>
           <button
             onClick={handleNextPage}
             disabled={page === totalPages}
-            className={`flex items-center justify-center w-10 h-10 rounded-full transition-colors ${page === totalPages ? 'text-outline-variant cursor-not-allowed' : 'hover:bg-surface-container-high dark:hover:bg-slate-800 text-on-surface-variant dark:text-slate-400'}`}
+            className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors ${page === totalPages ? 'cursor-not-allowed text-outline-variant' : 'text-on-surface-variant hover:bg-surface-container-high dark:text-slate-400 dark:hover:bg-slate-800'}`}
           >
             <span className="material-symbols-outlined" translate="no">chevron_right</span>
           </button>

@@ -74,7 +74,7 @@ export const PostDetailPage: React.FC<PostDetailPageProps> = ({ user, profile })
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="mx-auto max-w-4xl">
       {/* 뒤로가기 */}
       <button
         onClick={() => navigate('/Community')}
@@ -84,9 +84,9 @@ export const PostDetailPage: React.FC<PostDetailPageProps> = ({ user, profile })
         목록으로
       </button>
 
-      <article className="bg-surface-container-lowest dark:bg-slate-800 rounded-xl overflow-hidden">
+      <article className="overflow-hidden rounded-xl bg-surface-container-lowest dark:bg-slate-800">
         {/* 게시글 헤더 */}
-        <header className="p-8 md:p-12 border-b border-outline-variant/15 dark:border-slate-700">
+        <header className="border-b border-outline-variant/15 p-5 dark:border-slate-700 sm:p-8 md:p-12">
           <div className="flex items-center gap-3 mb-4">
             <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-semibold tracking-wider">
               {categoryLabel}
@@ -95,11 +95,11 @@ export const PostDetailPage: React.FC<PostDetailPageProps> = ({ user, profile })
               {formatRelativeTime(post.created_at)}
             </span>
           </div>
-          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-on-surface dark:text-white mb-8 leading-tight">
+          <h1 className="mb-6 text-2xl font-extrabold leading-tight tracking-tight text-on-surface dark:text-white sm:text-3xl md:mb-8 md:text-4xl">
             {post.title}
           </h1>
           {/* 작성자 정보 + 수정/삭제 */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
               <ProfileAvatar
                 nickname={post.author.nickname}
@@ -118,7 +118,7 @@ export const PostDetailPage: React.FC<PostDetailPageProps> = ({ user, profile })
               </div>
             </div>
             {isOwner && (
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <button
                   onClick={() => navigate(`/Community/${post.id}/edit`)}
                   className="flex items-center gap-1 px-4 py-2 text-sm text-on-surface-variant dark:text-slate-400 bg-surface-container-low dark:bg-slate-700 rounded-full hover:bg-surface-container-high dark:hover:bg-slate-600 transition-colors"
@@ -140,7 +140,7 @@ export const PostDetailPage: React.FC<PostDetailPageProps> = ({ user, profile })
         </header>
 
         {/* 본문 */}
-        <div className="p-8 md:p-12">
+        <div className="p-5 sm:p-8 md:p-12">
           <div className="whitespace-pre-wrap text-on-surface dark:text-slate-200 leading-relaxed text-base">
             {post.content}
           </div>

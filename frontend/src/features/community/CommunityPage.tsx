@@ -149,9 +149,9 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({ user, profile }) =
   const visiblePages = Array.from({ length: endPage - startPage + 1 }, (_, index) => startPage + index);
 
   return (
-    <div>
-      <section className="mb-12">
-        <h1 className="text-5xl md:text-6xl font-extrabold tracking-tighter mb-4 text-on-surface dark:text-white">
+    <div className="w-full">
+      <section className="mb-10 sm:mb-12">
+        <h1 className="mb-4 text-4xl font-extrabold tracking-tighter text-on-surface dark:text-white sm:text-5xl md:text-6xl">
           커뮤니티
         </h1>
         <p className="text-on-surface-variant dark:text-slate-400 text-lg max-w-2xl leading-relaxed">
@@ -159,10 +159,10 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({ user, profile }) =
         </p>
       </section>
 
-      <div className="bg-surface-container-low dark:bg-slate-900 rounded-xl p-6 md:p-8">
+      <div className="rounded-xl bg-surface-container-low p-4 dark:bg-slate-900 sm:p-6 md:p-8">
         <div className="flex flex-col gap-4 mb-6">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-wrap items-center gap-2">
               {CATEGORY_TABS.map((tab) => (
                 <button
                   key={tab.key}
@@ -178,7 +178,7 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({ user, profile }) =
               ))}
             </div>
 
-            <div className="flex items-center gap-3 self-end lg:self-auto">
+            <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:self-end lg:self-auto">
               <label className="flex items-center gap-2 text-sm text-on-surface-variant dark:text-slate-300">
                 <span>목록 수</span>
                 <select
@@ -225,7 +225,56 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({ user, profile }) =
           </div>
         )}
 
-        <div className="overflow-x-auto rounded-lg border border-outline-variant/25 dark:border-slate-700">
+        <div className="space-y-3 md:hidden">
+          {isLoading && posts.length === 0 ? (
+            <div className="rounded-lg border border-outline-variant/25 bg-surface-container-lowest px-4 py-16 text-center text-on-surface-variant dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">
+              遺덈윭?ㅻ뒗 以?..
+            </div>
+          ) : error && posts.length === 0 ? (
+            <div className="rounded-lg border border-outline-variant/25 bg-surface-container-lowest px-4 py-16 text-center text-red-500 dark:border-slate-700 dark:bg-slate-800">
+              {error}
+            </div>
+          ) : posts.length === 0 ? (
+            <div className="rounded-lg border border-outline-variant/25 bg-surface-container-lowest px-4 py-16 text-center text-on-surface-variant dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">
+              寃뚯떆湲???놁뒿?덈떎.
+            </div>
+          ) : (
+            posts.map((post) => {
+              const categoryLabel = CATEGORIES[post.category] || post.category;
+              const authorLabel = post.author.rank
+                ? `${post.author.rank} ${post.author.nickname}`
+                : post.author.nickname;
+
+              return (
+                <button
+                  key={post.id}
+                  type="button"
+                  onClick={() => navigate(`/Community/${post.id}`)}
+                  className="w-full rounded-xl border border-outline-variant/25 bg-surface-container-lowest p-4 text-left transition-colors hover:border-primary/40 dark:border-slate-700 dark:bg-slate-800"
+                >
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
+                      {categoryLabel}
+                    </span>
+                    <span className="text-xs text-on-surface-variant dark:text-slate-400">
+                      {formatBoardDate(post.created_at)}
+                    </span>
+                  </div>
+                  <h3 className="text-base font-semibold leading-snug text-on-surface dark:text-white">
+                    {post.title}
+                  </h3>
+                  <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-on-surface-variant dark:text-slate-400">
+                    <span>{authorLabel}</span>
+                    <span>Views {post.views}</span>
+                    <span>No. {post.post_number}</span>
+                  </div>
+                </button>
+              );
+            })
+          )}
+        </div>
+
+        <div className="hidden overflow-x-auto rounded-lg border border-outline-variant/25 dark:border-slate-700 md:block">
           <table className="min-w-[840px] w-full table-fixed bg-surface-container-lowest dark:bg-slate-800">
             <thead>
               <tr className="border-b border-outline-variant/20 dark:border-slate-700 text-sm text-on-surface-variant dark:text-slate-400">
@@ -337,7 +386,7 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({ user, profile }) =
 
         <form
           onSubmit={handleSearchSubmit}
-          className="mt-8 pt-6 border-t border-outline-variant/15 dark:border-slate-700 flex flex-col md:flex-row items-stretch md:items-center justify-end gap-3"
+          className="mt-8 flex flex-col items-stretch justify-end gap-3 border-t border-outline-variant/15 pt-6 dark:border-slate-700 md:flex-row md:items-center"
         >
           <select
             value={searchType}
