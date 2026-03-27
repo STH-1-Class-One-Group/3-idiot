@@ -7,6 +7,7 @@ import { DashboardPage } from './features/dashboard/DashboardPage';
 import { MealPage } from './features/meal/MealPage';
 import { NewsPage } from './features/news/NewsPage';
 import { ShopPage } from './features/shop/ShopPage';
+import { ArmedReservePage } from './features/armedReserve/ArmedReservePage';
 import { CartProvider } from './features/cart/context/CartContext';
 import { CartModal } from './features/cart/components/CartModal';
 import { supabase } from './api/supabaseClient';
@@ -189,6 +190,7 @@ const App: React.FC = () => {
             <Routes>
               <Route path="/" element={<ShopPage />} />
               <Route path="/Dashboard" element={<DashboardPage />} />
+              <Route path="/armed-reseve" element={<ArmedReservePage />} />
               <Route path="/Meal" element={<MealPage />} />
               <Route path="/News" element={<NewsPage />} />
               <Route path="/payment-success" element={<PaymentSuccess />} />
