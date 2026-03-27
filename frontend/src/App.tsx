@@ -11,6 +11,7 @@ import { CartProvider } from './features/cart/context/CartContext';
 import { CartModal } from './features/cart/components/CartModal';
 import { supabase } from './api/supabaseClient';
 import { ProfileSetupModal } from './components/common/ProfileSetupModal';
+import { SignupCompletionModal } from './components/common/SignupCompletionModal';
 import { CommunityPage } from './features/community/CommunityPage';
 import { PostDetailPage } from './features/community/PostDetailPage';
 import { PostWritePage } from './features/community/PostWritePage';
@@ -74,6 +75,7 @@ const App: React.FC = () => {
   const [user, setUser] = useState<User | null | undefined>(undefined);
   const [profile, setProfile] = useState<Profile | null | undefined>(undefined);
   const [showProfileSetup, setShowProfileSetup] = useState(false);
+  const [showSignupCompletion, setShowSignupCompletion] = useState(false);
 
   useEffect(() => {
     let isActive = true;
@@ -207,6 +209,7 @@ const App: React.FC = () => {
                     profile={profile ?? null}
                     isProfileLoading={profile === undefined}
                     onProfileUpdated={setProfile}
+                    onAccountDeleted={handleSignOut}
                   />
                 }
               />
@@ -228,12 +231,20 @@ const App: React.FC = () => {
             user={user}
             initialProfile={profile ?? null}
             onProfileCreated={(newProfile) => {
+              const shouldShowCompletionMessage = profile == null;
               setProfile(newProfile);
               setShowProfileSetup(false);
+              if (shouldShowCompletionMessage) {
+                setShowSignupCompletion(true);
+              }
             }}
             onSignOut={handleSignOut}
           />
         )}
+        <SignupCompletionModal
+          isOpen={showSignupCompletion}
+          onClose={() => setShowSignupCompletion(false)}
+        />
       </BrowserRouter>
     </CartProvider>
   );

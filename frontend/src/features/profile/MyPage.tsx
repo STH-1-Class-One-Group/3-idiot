@@ -12,12 +12,14 @@ import {
 import { Profile } from './types';
 import { getProviderLabel } from './profileFormUtils';
 import { ProfileEditModal } from './ProfileEditModal';
+import { DeleteAccountModal } from './DeleteAccountModal';
 
 interface MyPageProps {
   user: User | null;
   profile: Profile | null;
   isProfileLoading: boolean;
   onProfileUpdated: (profile: Profile) => void;
+  onAccountDeleted: () => Promise<void> | void;
 }
 
 const formatDateLabel = (value?: string | null) => {
@@ -38,9 +40,11 @@ export const MyPage: React.FC<MyPageProps> = ({
   profile,
   isProfileLoading,
   onProfileUpdated,
+  onAccountDeleted,
 }) => {
   const navigate = useNavigate();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   useEffect(() => {
     if (!user && !isProfileLoading) {
@@ -172,6 +176,13 @@ export const MyPage: React.FC<MyPageProps> = ({
                 >
                   대시보드 보기
                 </button>
+                <button
+                  type="button"
+                  onClick={() => setIsDeleteModalOpen(true)}
+                  className="inline-flex items-center justify-center rounded-full border border-red-200 bg-red-50 px-6 py-3 text-sm font-semibold text-red-600 transition-colors hover:border-red-300 hover:bg-red-100 dark:border-red-900/50 dark:bg-red-950/20 dark:text-red-300 dark:hover:border-red-800 dark:hover:bg-red-950/40"
+                >
+                  회원 탈퇴
+                </button>
               </div>
             </div>
 
@@ -281,6 +292,27 @@ export const MyPage: React.FC<MyPageProps> = ({
             </div>
           </article>
         </section>
+
+        <section className="rounded-[28px] border border-red-200/70 bg-[linear-gradient(135deg,rgba(254,242,242,0.95),rgba(255,255,255,0.95))] p-6 shadow-[0_16px_70px_-50px_rgba(127,29,29,0.45)] dark:border-red-900/40 dark:bg-[linear-gradient(135deg,rgba(69,10,10,0.6),rgba(15,23,42,0.88))]">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-red-600 dark:text-red-300">
+                Danger Zone
+              </p>
+              <h2 className="mt-2 text-2xl font-bold text-slate-900 dark:text-white">회원 탈퇴</h2>
+              <p className="mt-2 max-w-2xl text-sm leading-7 text-slate-600 dark:text-slate-300">
+                계정을 삭제하면 프로필, 커뮤니티 활동, 장바구니와 같이 사용자에게 연결된 데이터가 함께 제거되며 복구할 수 없습니다.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsDeleteModalOpen(true)}
+              className="inline-flex items-center justify-center rounded-full bg-[linear-gradient(135deg,#dc2626,#b91c1c)] px-6 py-3 text-sm font-bold text-white shadow-[0_18px_40px_-24px_rgba(185,28,28,0.75)] transition-transform hover:-translate-y-0.5"
+            >
+              회원 탈퇴 진행
+            </button>
+          </div>
+        </section>
       </div>
 
       <ProfileEditModal
@@ -289,6 +321,13 @@ export const MyPage: React.FC<MyPageProps> = ({
         profile={profile}
         onClose={() => setIsEditModalOpen(false)}
         onProfileUpdated={onProfileUpdated}
+      />
+      <DeleteAccountModal
+        isOpen={isDeleteModalOpen}
+        user={user}
+        profile={profile}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onAccountDeleted={onAccountDeleted}
       />
     </>
   );
