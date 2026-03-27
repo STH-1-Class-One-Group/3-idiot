@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { buildApiUrl } from '../../api/apiBaseUrl';
 import { MealPopup, MealItem } from './components/MealPopup';
 import { fetchNewsBatch } from '../news/newsApi';
 
@@ -91,8 +92,6 @@ export const DashboardPage: React.FC = () => {
       return;
     }
     didInitRef.current = true;
-    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000';
-
     const processMealData = async (data: MealData[]) => {
       const cleanString = (value?: string) => (value ? value.replace(/\([^)]*\)/g, '').trim() : '');
 
@@ -178,7 +177,7 @@ export const DashboardPage: React.FC = () => {
       setMealInfo(DEFAULT_MEAL_INFO);
       try {
         const todayDate = getTodayString();
-        const response = await fetch(`${apiUrl}/api/v1/meals/${todayDate}`);
+        const response = await fetch(buildApiUrl(`/api/v1/meals/${todayDate}`));
         if (!response.ok) {
           throw new Error('Failed to fetch meals');
         }
