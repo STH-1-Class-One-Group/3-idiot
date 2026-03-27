@@ -2,16 +2,23 @@ const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
 export const USER_TYPE_OPTIONS = [
   { value: 'civilian', label: '일반인' },
-  { value: 'active_service', label: '현역 군인' },
+  { value: 'active_enlisted', label: '현역군인(병)' },
+  { value: 'active_cadre', label: '현역간부' },
+] as const;
+
+export const CADET_CATEGORY_OPTIONS = [
+  { value: 'officer', label: '장교' },
+  { value: 'nco', label: '부사관' },
+  { value: 'civilian_staff', label: '군무원' },
 ] as const;
 
 export const SERVICE_TRACK_CONFIG = {
   army_active: {
-    label: '육군 현역',
+    label: '육군',
     durationMonths: 18,
   },
   air_force_active: {
-    label: '공군 현역',
+    label: '공군',
     durationMonths: 21,
   },
   social_service: {
@@ -29,6 +36,7 @@ export const SERVICE_TRACK_CONFIG = {
 } as const;
 
 export type UserType = (typeof USER_TYPE_OPTIONS)[number]['value'];
+export type CadreCategory = (typeof CADET_CATEGORY_OPTIONS)[number]['value'];
 export type ServiceTrack = keyof typeof SERVICE_TRACK_CONFIG;
 
 export const SERVICE_TRACK_OPTIONS = Object.entries(SERVICE_TRACK_CONFIG).map(([value, config]) => ({
@@ -66,20 +74,21 @@ const formatDisplayDate = (date: Date) => {
 const diffInDays = (later: Date, earlier: Date) =>
   Math.floor((toDateOnly(later).getTime() - toDateOnly(earlier).getTime()) / ONE_DAY_MS);
 
-export const isActiveServiceUser = (userType: string | null | undefined) => userType === 'active_service';
+export const isEnlistedUser = (userType: string | null | undefined) => userType === 'active_enlisted';
+
+export const isCadreUser = (userType: string | null | undefined) => userType === 'active_cadre';
 
 export const getUserTypeLabel = (userType: string | null | undefined) =>
   USER_TYPE_OPTIONS.find((option) => option.value === userType)?.label ?? '미설정';
 
-export const getServiceTrackLabel = (serviceTrack: string | null | undefined) =>
-  serviceTrack && serviceTrack in SERVICE_TRACK_CONFIG
-    ? SERVICE_TRACK_CONFIG[serviceTrack as ServiceTrack].label
-    : '-';
+export const getCadreCategoryLabel = (cadreCategory: string | null | undefined) =>
+  CADET_CATEGORY_OPTIONS.find((option) => option.value === cadreCategory)?.label ?? '-';
 
 export const calculateServiceTimeline = (
   userType: string | null | undefined,
   serviceTrack: string | null | undefined,
   enlistmentDate: string | null | undefined,
+  cadreCategory?: string | null,
   now = new Date()
 ): ServiceTimeline => {
   if (!userType) {
@@ -96,7 +105,7 @@ export const calculateServiceTimeline = (
     };
   }
 
-  if (!isActiveServiceUser(userType)) {
+  if (userType === 'civilian') {
     return {
       hasEnlistmentDate: false,
       hasServiceTrack: false,
@@ -110,6 +119,20 @@ export const calculateServiceTimeline = (
     };
   }
 
+  if (userType === 'active_cadre') {
+    return {
+      hasEnlistmentDate: Boolean(enlistmentDate),
+      hasServiceTrack: false,
+      enlistmentLabel: enlistmentDate ? formatDisplayDate(parseIsoDate(enlistmentDate)) : '-',
+      dischargeLabel: '별도 관리',
+      dDayLabel: '수동 관리',
+      progressPercent: 0,
+      helperText: `${getCadreCategoryLabel(cadreCategory)} 계정은 고정 복무기간 기반의 자동 전역일 계산을 지원하지 않습니다.`,
+      serviceLabel: getCadreCategoryLabel(cadreCategory),
+      serviceDurationLabel: '-',
+    };
+  }
+
   if (!serviceTrack || !(serviceTrack in SERVICE_TRACK_CONFIG)) {
     return {
       hasEnlistmentDate: Boolean(enlistmentDate),
@@ -118,7 +141,7 @@ export const calculateServiceTimeline = (
       dischargeLabel: '-',
       dDayLabel: '복무유형 필요',
       progressPercent: 0,
-      helperText: '현역 군인 회원은 복무 유형을 설정해야 전역일 계산을 표시할 수 있습니다.',
+      helperText: '현역군인(병) 회원은 복무 유형을 설정해야 전역일 계산을 표시할 수 있습니다.',
       serviceLabel: '-',
       serviceDurationLabel: '-',
     };
@@ -134,7 +157,7 @@ export const calculateServiceTimeline = (
       dischargeLabel: '-',
       dDayLabel: '입대일 필요',
       progressPercent: 0,
-      helperText: '현역 군인 회원은 입대일을 설정해야 전역일 계산을 표시할 수 있습니다.',
+      helperText: '현역군인(병) 회원은 입대일을 설정해야 전역일 계산을 표시할 수 있습니다.',
       serviceLabel: selectedService.label,
       serviceDurationLabel: `${selectedService.durationMonths}개월`,
     };

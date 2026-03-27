@@ -77,7 +77,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ profile }) => {
   const serviceTimeline = calculateServiceTimeline(
     profile?.user_type,
     profile?.service_track,
-    profile?.enlistment_date
+    profile?.enlistment_date,
+    profile?.cadre_category
   );
 
   const [mealInfo, setMealInfo] = useState(DEFAULT_MEAL_INFO);

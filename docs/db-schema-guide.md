@@ -85,7 +85,8 @@ erDiagram
     PROFILES {
         uuid id PK_FK "auth.users.id 참조"
         string nickname "unique, 필수"
-        string user_type "회원 유형 (civilian/active_service)"
+        string user_type "회원 유형 (civilian/active_enlisted/active_cadre)"
+        string cadre_category "현역간부 직군"
         string rank "계급 (선택)"
         string unit "소속부대 (선택)"
         date enlistment_date "입대일 (선택)"
@@ -149,11 +150,12 @@ erDiagram
 create table public.profiles (
   id         uuid primary key references auth.users(id) on delete cascade,
   nickname   text not null unique,   -- 서비스 내 닉네임 (필수, 중복 불가)
-  user_type  text,                   -- 회원 유형 (civilian 또는 active_service)
+  user_type  text,                   -- 회원 유형 (civilian/active_enlisted/active_cadre)
+  cadre_category text,              -- 현역간부 직군
   rank       text,                   -- 계급 (선택)
   unit       text,                   -- 소속부대 (선택)
   enlistment_date date,             -- 입대일 (선택)
-  service_track text,               -- 현역 군인 복무 유형
+  service_track text,               -- 현역군인(병) 복무 유형
   profile_completed boolean not null default false, -- 프로필 설정 완료 여부
   avatar_url text,                   -- Supabase Storage 프로필 이미지 경로
   created_at timestamptz default now(),
@@ -273,8 +275,10 @@ sequenceDiagram
         Supabase-->>브라우저: 데이터 없음
         브라우저-->>사용자: 프로필 설정 모달 표시
         사용자->>브라우저: 닉네임/회원유형 입력
-        alt 현역 군인
-            사용자->>브라우저: 복무유형/계급/부대/입대일 입력
+        alt 현역군인(병)
+            사용자->>브라우저: 복무유형/부대/입대일 입력
+        else 현역간부
+            사용자->>브라우저: 간부유형/계급(직급)/부대/임용일 입력
         else 일반인
             사용자->>브라우저: 기본 프로필만 저장
         end

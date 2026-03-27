@@ -19,6 +19,7 @@ import { TermsOfServicePage } from './features/legal/TermsOfServicePage';
 import { PrivacyPolicyPage } from './features/legal/PrivacyPolicyPage';
 import { SupportPage } from './features/legal/SupportPage';
 import { MyPage } from './features/profile/MyPage';
+import { isProfileSetupRequired } from './features/profile/profileModes';
 import { Profile } from './features/profile/types';
 
 type StorageEntry = {
@@ -66,22 +67,6 @@ const loadProfile = async (currentUser: User): Promise<Profile | null> => {
   }
 
   return (data as Profile | null) ?? null;
-};
-
-const shouldRequireProfileSetup = (currentProfile: Profile | null) => {
-  if (!currentProfile) {
-    return true;
-  }
-
-  if (!currentProfile.profile_completed || !currentProfile.user_type) {
-    return true;
-  }
-
-  if (currentProfile.user_type === 'active_service') {
-    return !currentProfile.enlistment_date || !currentProfile.service_track;
-  }
-
-  return false;
 };
 
 const App: React.FC = () => {
@@ -161,7 +146,7 @@ const App: React.FC = () => {
       }
 
       setProfile(nextProfile);
-      setShowProfileSetup(shouldRequireProfileSetup(nextProfile));
+      setShowProfileSetup(isProfileSetupRequired(nextProfile));
     };
 
     void syncProfile();

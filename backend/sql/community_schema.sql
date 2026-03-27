@@ -9,7 +9,8 @@
 create table if not exists public.profiles (
   id          uuid primary key references auth.users(id) on delete cascade,
   nickname    text not null unique,
-  user_type   text check (user_type in ('civilian', 'active_service')),
+  user_type   text check (user_type in ('civilian', 'active_enlisted', 'active_cadre')),
+  cadre_category text check (cadre_category in ('officer', 'nco', 'civilian_staff')),
   rank        text,                        -- 계급 (선택)
   unit        text,                        -- 소속부대 (선택)
   enlistment_date date,                    -- 입대일 (선택)

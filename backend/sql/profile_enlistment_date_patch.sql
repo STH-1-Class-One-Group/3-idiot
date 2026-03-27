@@ -12,12 +12,17 @@ comment on column public.profiles.enlistment_date is '입대일 (군 복무 중�
 alter table public.profiles
   add column if not exists user_type text;
 
-comment on column public.profiles.user_type is '회원 유형 (civilian 또는 active_service)';
+comment on column public.profiles.user_type is '회원 유형 (civilian, active_enlisted, active_cadre)';
+
+alter table public.profiles
+  add column if not exists cadre_category text;
+
+comment on column public.profiles.cadre_category is '현역간부 직군 (officer, nco, civilian_staff)';
 
 alter table public.profiles
   add column if not exists service_track text;
 
-comment on column public.profiles.service_track is '현역 군인의 복무 유형';
+comment on column public.profiles.service_track is '현역군인(병)의 복무 유형';
 
 alter table public.profiles
   add column if not exists profile_completed boolean not null default false;

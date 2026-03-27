@@ -2,6 +2,7 @@ export interface Profile {
   id: string;
   nickname: string;
   user_type: string | null;
+  cadre_category: string | null;
   rank: string | null;
   unit: string | null;
   enlistment_date: string | null;
@@ -15,6 +16,7 @@ export interface Profile {
 export interface ProfileFormValues {
   nickname: string;
   userType: string;
+  cadreCategory: string;
   rank: string;
   unit: string;
   enlistmentDate: string;
