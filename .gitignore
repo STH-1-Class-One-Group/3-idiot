@@ -17,7 +17,3 @@ Thumbs.db
 *.temp
 *.bak
 *.orig
-
-# Generated local assets that are not part of the app
-/frontend/public/Gemini_Generated_Image*.png
-/frontend/public/Whisk_*.png
