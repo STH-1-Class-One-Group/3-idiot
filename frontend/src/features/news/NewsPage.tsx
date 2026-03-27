@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { SearchBar } from '../../components/common/SearchBar';
 import { fetchNewsBatch } from './newsApi';
 
@@ -107,6 +108,12 @@ export const NewsPage: React.FC = () => {
 
   return (
     <div className="w-full">
+      <Helmet>
+        <title>방산 뉴스 — Modern Sentinel</title>
+        <meta name="description" content="최신 방산·국방 뉴스를 한곳에서. 군인과 방산 관계자를 위한 뉴스 큐레이션 서비스." />
+        <meta property="og:title" content="방산 뉴스 — Modern Sentinel" />
+        <meta property="og:description" content="최신 방산·국방 뉴스를 한곳에서. 군인과 방산 관계자를 위한 뉴스 큐레이션 서비스." />
+      </Helmet>
       <section className="max-w-3xl mx-auto mb-10">
         <SearchBar
           searchType="news"

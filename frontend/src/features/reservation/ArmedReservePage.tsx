@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { KakaoMap } from './components/KakaoMap';
 import { TrainingCenterList } from './components/TrainingCenterList';
 import { TrainingCenterModal } from './components/TrainingCenterModal';
@@ -145,6 +146,12 @@ export const ArmedReservePage: React.FC = () => {
 
   return (
     <div className="space-y-12 w-full">
+      <Helmet>
+        <title>예비군 훈련장 찾기 — Modern Sentinel</title>
+        <meta name="description" content="전국 289개 예비군 훈련장 위치, 연락처, 지도 보기. 내 주변 훈련장을 거리순으로 찾아보세요." />
+        <meta property="og:title" content="예비군 훈련장 찾기 — Modern Sentinel" />
+        <meta property="og:description" content="전국 예비군 훈련장 위치와 정보를 한눈에. 카카오맵으로 내 주변 훈련장을 확인하세요." />
+      </Helmet>
       <section>
         <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4">
           <div>

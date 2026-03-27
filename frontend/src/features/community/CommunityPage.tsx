@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
 import { User } from '@supabase/supabase-js';
 import { Profile } from '../profile/types';
@@ -150,6 +151,12 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({ user, profile }) =
 
   return (
     <div>
+      <Helmet>
+        <title>군인 커뮤니티 — Modern Sentinel</title>
+        <meta name="description" content="군인들을 위한 자유 커뮤니티. 정보 공유, 질문, 후기를 나눠보세요." />
+        <meta property="og:title" content="군인 커뮤니티 — Modern Sentinel" />
+        <meta property="og:description" content="군인들을 위한 자유 커뮤니티. 정보 공유, 질문, 후기를 나눠보세요." />
+      </Helmet>
       <section className="mb-12">
         <h1 className="text-5xl md:text-6xl font-extrabold tracking-tighter mb-4 text-on-surface dark:text-white">
           커뮤니티

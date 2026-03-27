@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { CalendarPopup } from './components/CalendarPopup';
 
 interface MealItem {
@@ -208,6 +209,12 @@ export const MealPage: React.FC = () => {
 
   return (
     <div className="w-full">
+      <Helmet>
+        <title>군 급식 정보 — Modern Sentinel</title>
+        <meta name="description" content="오늘의 군 급식 메뉴를 확인하세요. 전국 부대 급식 정보를 실시간으로 제공합니다." />
+        <meta property="og:title" content="군 급식 정보 — Modern Sentinel" />
+        <meta property="og:description" content="오늘의 군 급식 메뉴를 확인하세요. 전국 부대 급식 정보를 실시간으로 제공합니다." />
+      </Helmet>
       {/* Universal Search Bar (Centered at top) - Optional UI from target code */}
       <div className="max-w-2xl mx-auto mb-10">
         <div className="relative">
