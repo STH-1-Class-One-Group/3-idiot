@@ -236,3 +236,9 @@ T @ scheduler.production.js:151이 오류 이해하기
 installHook.js:1 [DashboardPage] news fetch failed: TypeError: Failed to fetch
     at zi (newsApi.ts:44:10)
     at async DashboardPage.tsx:204:15, 모병정보 api까지(모병 모집 API 키가 없습니다. frontend 환경변수에 REACT_APP_DATA_SERVICE_KEY를 설정해 주세요.)) 그리고 community에서도 오류가 발생했어 CommunityPage.tsx:81  GET http://localhost:8000/api/v1/community/posts?page=1&per_page=30 net::ERR_CONNECTION_REFUSED 이 문제들을 좀 해결해주었으면 좋겠어
+
+
+   
+
+23-1. 다른 데이터들은 정상적으로 받아와, 그런데 커뮤니티 글들은 제대로 불러와지지 않아 이 버그 해결좀 해주면 돼 Error: 게시글을 불러오지 못했습니다.
+    at CommunityPage.tsx:86:15 GET https://three-idiot.onrender.com/api/v1/community/posts?page=1&per_page=30 502 (Bad Gateway)
