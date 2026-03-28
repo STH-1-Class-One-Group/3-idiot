@@ -331,3 +331,6 @@ installHook.js:1 TypeError: Failed to fetch
     at CommunityPage.tsx:150:1
 (커뮤니티 게시글을 불러오지 못하는 오류, 환경변수가 로그인 후에 불러오지 못하는 문제로 추정)
 일단 GEMINI.md파일을 참고해보는 것도 좋을 거야
+
+
+25. 다른 기능들은 다 제대로 동작해, 그런데 이제 로컬 환경에서 말고도 배포 환경에서도 로그인 시 리다이렉트가 제대로 동작이 되었으면 좋겠어 배포된 url로 접속해서 로그인을 하면 배포 페이지가 아닌 로컬 페이지로 리다이렉트가 되는 현상이 있거든, 그 부분 일단 수정이 되었으면 좋겠어 참고로 배포 URL은 https://teamc-defense-industry.pages.dev 경로야 그리고 전체적인 웹페이지 favicon 이미지는 frontend/public/favicon-final.png에 있는 이미지로 변경되었으면 좋겠어
