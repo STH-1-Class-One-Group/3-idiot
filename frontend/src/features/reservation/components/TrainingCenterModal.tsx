@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { Map, MapMarker, useKakaoLoader } from 'react-kakao-maps-sdk';
+import { clientEnv } from '../../../config/clientEnv';
 import { TrainingCenter } from '../data/trainingCenters';
 
 interface TrainingCenterModalProps {
@@ -7,18 +8,70 @@ interface TrainingCenterModalProps {
   onClose: () => void;
 }
 
-const KAKAO_MAP_KEY = process.env.REACT_APP_KAKAO_MAP_KEY || '';
+const KAKAO_MAP_KEY = clientEnv.kakaoMapKey;
 
-export const TrainingCenterModal: React.FC<TrainingCenterModalProps> = ({ center, onClose }) => {
-  const [loading] = useKakaoLoader({
+const ModalMapFallback: React.FC<{ message: string }> = ({ message }) => (
+  <div className="rounded-xl bg-surface-container-low dark:bg-slate-800 aspect-[16/9] flex items-center justify-center border border-outline-variant/10 dark:border-slate-700">
+    <div className="text-center text-on-surface-variant dark:text-slate-400 px-6">
+      <span
+        className="material-symbols-outlined text-5xl opacity-40 block mb-2"
+        translate="no"
+      >
+        map
+      </span>
+      <p className="text-sm">{message}</p>
+    </div>
+  </div>
+);
+
+const TrainingCenterMap: React.FC<{
+  center: TrainingCenter;
+  hasCoords: boolean;
+}> = ({ center, hasCoords }) => {
+  const [loading, error] = useKakaoLoader({
     appkey: KAKAO_MAP_KEY,
   });
+
+  if (!hasCoords) {
+    return (
+      <ModalMapFallback message="Location data is not available for this training center." />
+    );
+  }
+
+  if (error) {
+    return <ModalMapFallback message="Could not load the Kakao map." />;
+  }
+
+  if (loading) {
+    return <ModalMapFallback message="Loading the Kakao map..." />;
+  }
+
+  return (
+    <div className="rounded-xl overflow-hidden aspect-[16/9] border border-outline-variant/10 dark:border-slate-700">
+      <Map
+        center={{ lat: center.lat, lng: center.lng }}
+        level={4}
+        style={{ width: '100%', height: '100%' }}
+      >
+        <MapMarker position={{ lat: center.lat, lng: center.lng }} />
+      </Map>
+    </div>
+  );
+};
+
+export const TrainingCenterModal: React.FC<TrainingCenterModalProps> = ({
+  center,
+  onClose,
+}) => {
   const zoneLabel = center.zones.join(', ');
 
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') {
+        onClose();
+      }
     };
+
     document.addEventListener('keydown', handleEsc);
     return () => document.removeEventListener('keydown', handleEsc);
   }, [onClose]);
@@ -33,13 +86,15 @@ export const TrainingCenterModal: React.FC<TrainingCenterModalProps> = ({ center
   const hasCoords = center.lat !== 0 && center.lng !== 0;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      onClick={onClose}
+    >
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
       <div
         className="relative bg-surface-container-lowest dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
         <div className="sticky top-0 z-10 flex items-center justify-between p-6 pb-4 bg-surface-container-lowest dark:bg-slate-900 border-b border-outline-variant/10 dark:border-slate-800">
           <div>
             <h2 className="text-2xl font-extrabold text-on-surface dark:text-white tracking-tight">
@@ -54,7 +109,9 @@ export const TrainingCenterModal: React.FC<TrainingCenterModalProps> = ({ center
               </span>
               {center.distance != null && (
                 <span className="text-sm text-primary dark:text-blue-400 font-bold">
-                  {center.distance < 1 ? `${Math.round(center.distance * 1000)}m` : `${center.distance.toFixed(1)}km`}
+                  {center.distance < 1
+                    ? `${Math.round(center.distance * 1000)}m`
+                    : `${center.distance.toFixed(1)}km`}
                 </span>
               )}
             </div>
@@ -63,73 +120,86 @@ export const TrainingCenterModal: React.FC<TrainingCenterModalProps> = ({ center
             onClick={onClose}
             className="p-2 rounded-full hover:bg-surface-container-high dark:hover:bg-slate-800 transition-colors text-on-surface-variant dark:text-slate-400"
           >
-            <span className="material-symbols-outlined text-2xl" translate="no">close</span>
+            <span className="material-symbols-outlined text-2xl" translate="no">
+              close
+            </span>
           </button>
         </div>
 
-        {/* Map */}
         <div className="px-6 pt-4">
-          {hasCoords && !loading ? (
-            <div className="rounded-xl overflow-hidden aspect-[16/9] border border-outline-variant/10 dark:border-slate-700">
-              <Map
-                center={{ lat: center.lat, lng: center.lng }}
-                level={4}
-                style={{ width: '100%', height: '100%' }}
-              >
-                <MapMarker position={{ lat: center.lat, lng: center.lng }} />
-              </Map>
-            </div>
+          {KAKAO_MAP_KEY ? (
+            <TrainingCenterMap center={center} hasCoords={hasCoords} />
           ) : (
-            <div className="rounded-xl bg-surface-container-low dark:bg-slate-800 aspect-[16/9] flex items-center justify-center border border-outline-variant/10 dark:border-slate-700">
-              <div className="text-center text-on-surface-variant dark:text-slate-400">
-                <span className="material-symbols-outlined text-5xl opacity-40 block mb-2" translate="no">map</span>
-                <p className="text-sm">{loading ? '지도 로딩 중...' : '위치 정보를 불러올 수 없습니다'}</p>
-              </div>
-            </div>
+            <ModalMapFallback message="Kakao map is unavailable in this build." />
           )}
         </div>
 
-        {/* Details */}
         <div className="p-6 space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="flex items-start gap-3 p-4 rounded-xl bg-surface-container-low dark:bg-slate-800/50">
-              <span className="material-symbols-outlined text-primary dark:text-blue-400 mt-0.5" translate="no">location_on</span>
+              <span
+                className="material-symbols-outlined text-primary dark:text-blue-400 mt-0.5"
+                translate="no"
+              >
+                location_on
+              </span>
               <div>
-                <p className="text-xs font-bold text-on-surface-variant dark:text-slate-400 uppercase tracking-wider mb-1">주소</p>
-                <p className="text-sm text-on-surface dark:text-white">{center.address}</p>
+                <p className="text-xs font-bold text-on-surface-variant dark:text-slate-400 uppercase tracking-wider mb-1">
+                  Address
+                </p>
+                <p className="text-sm text-on-surface dark:text-white">
+                  {center.address}
+                </p>
               </div>
             </div>
             <div className="flex items-start gap-3 p-4 rounded-xl bg-surface-container-low dark:bg-slate-800/50">
-              <span className="material-symbols-outlined text-primary dark:text-blue-400 mt-0.5" translate="no">call</span>
+              <span
+                className="material-symbols-outlined text-primary dark:text-blue-400 mt-0.5"
+                translate="no"
+              >
+                call
+              </span>
               <div>
-                <p className="text-xs font-bold text-on-surface-variant dark:text-slate-400 uppercase tracking-wider mb-1">연락처</p>
-                <p className="text-sm text-on-surface dark:text-white">{center.phone || '정보 없음'}</p>
+                <p className="text-xs font-bold text-on-surface-variant dark:text-slate-400 uppercase tracking-wider mb-1">
+                  Phone
+                </p>
+                <p className="text-sm text-on-surface dark:text-white">
+                  {center.phone || 'Not available'}
+                </p>
               </div>
             </div>
             <div className="flex items-start gap-3 p-4 rounded-xl bg-surface-container-low dark:bg-slate-800/50 sm:col-span-2">
-              <span className="material-symbols-outlined text-primary dark:text-blue-400 mt-0.5" translate="no">badge</span>
+              <span
+                className="material-symbols-outlined text-primary dark:text-blue-400 mt-0.5"
+                translate="no"
+              >
+                badge
+              </span>
               <div>
-                <p className="text-xs font-bold text-on-surface-variant dark:text-slate-400 uppercase tracking-wider mb-1">관할 지역</p>
-                <p className="text-sm text-on-surface dark:text-white">{zoneLabel}</p>
+                <p className="text-xs font-bold text-on-surface-variant dark:text-slate-400 uppercase tracking-wider mb-1">
+                  Coverage
+                </p>
+                <p className="text-sm text-on-surface dark:text-white">
+                  {zoneLabel}
+                </p>
                 {center.aliases.length > 1 && (
                   <p className="text-xs text-on-surface-variant dark:text-slate-400 mt-2">
-                    통합된 명칭: {center.aliases.join(' / ')}
+                    Aliases: {center.aliases.join(' / ')}
                   </p>
                 )}
               </div>
             </div>
           </div>
 
-          {/* Action buttons */}
           <div className="flex gap-3 pt-2">
             <button
               onClick={onClose}
               className="flex-1 bg-surface-container-high dark:bg-slate-800 text-on-surface dark:text-slate-200 py-3 rounded-full text-sm font-bold hover:bg-surface-dim dark:hover:bg-slate-700 transition-colors"
             >
-              닫기
+              Close
             </button>
             <button className="flex-1 bg-primary text-on-primary py-3 rounded-full text-sm font-bold hover:opacity-90 transition-opacity">
-              신청하기
+              Request Info
             </button>
           </div>
         </div>

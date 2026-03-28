@@ -88,6 +88,8 @@ const App: React.FC = () => {
 
     const syncInitialSession = async () => {
       if (!hasSupabaseConfig) {
+        clearSupabaseAuthStorage();
+
         if (isActive) {
           setUser(null);
           setProfile(null);

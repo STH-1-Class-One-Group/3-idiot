@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { User } from '@supabase/supabase-js';
 import { Helmet } from 'react-helmet-async';
 
+import { buildPublicAssetUrl, isProductionBuild } from '../../config/clientEnv';
 import {
   getSupabaseConfigErrorMessage,
   hasSupabaseConfig,
@@ -26,8 +27,7 @@ interface NewsItem extends NewsItemPayload {
   id?: string;
 }
 
-const FALLBACK_THUMBNAIL =
-  'https://szpwchwghfsswtdrtrmr.supabase.co/storage/v1/object/public/food-media/thumbnail.png';
+const FALLBACK_THUMBNAIL = buildPublicAssetUrl('thumbnail.png');
 
 const getNewsKey = (news: NewsItem) => news.id || news.link;
 
@@ -345,7 +345,7 @@ export const NewsPage: React.FC = () => {
         : [];
   const shouldShowLoading = isLoading && allNews.length === 0;
   const debugStateLabel =
-    process.env.NODE_ENV !== 'production'
+    !isProductionBuild
       ? `news:${allNews.length} filtered:${filteredNews.length} visible:${renderNews.length} loading:${String(isLoading)}`
       : '';
 

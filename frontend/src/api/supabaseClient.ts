@@ -1,21 +1,45 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient, User } from '@supabase/supabase-js';
+import { clientEnv } from '../config/clientEnv';
 
-// .env 파일에 설정된 Supabase 환경 변수들을 가져옵니다.
-const supabaseUrl = (process.env.REACT_APP_SUPABASE_URL || '').trim();
-const supabaseAnonKey = (process.env.REACT_APP_SUPABASE_ANON_KEY || '').trim();
-
-// 환경 변수가 제대로 설정되었는지 확인하는 플래그
-export const hasSupabaseConfig = Boolean(supabaseUrl && supabaseAnonKey);
+export const hasSupabaseConfig = Boolean(
+  clientEnv.supabaseUrl && clientEnv.supabaseAnonKey
+);
 
 const SUPABASE_CONFIG_ERROR_MESSAGE =
-  'Supabase 브라우저 설정이 없습니다. REACT_APP_SUPABASE_URL과 REACT_APP_SUPABASE_ANON_KEY를 설정해 주세요.';
+  'Supabase browser client is not configured. Set REACT_APP_SUPABASE_URL and REACT_APP_SUPABASE_ANON_KEY.';
 
-// 빈 문자열로 클라이언트를 생성하면 에러가 발생하므로, 값이 없을 경우 임시 URL을 사용합니다.
-// (실제 데이터 요청은 hasSupabaseConfig가 true일 때만 실행하는 것이 좋습니다.)
-export const supabase = createClient(
-  supabaseUrl || 'https://placeholder.supabase.co',
-  supabaseAnonKey || 'placeholder-key'
-);
+let supabaseClient: SupabaseClient | null = null;
+
+const createSupabaseBrowserClient = () =>
+  createClient(clientEnv.supabaseUrl, clientEnv.supabaseAnonKey);
+
+export const requireSupabaseBrowserClient = (): SupabaseClient => {
+  if (!hasSupabaseConfig) {
+    throw new Error(SUPABASE_CONFIG_ERROR_MESSAGE);
+  }
+
+  if (!supabaseClient) {
+    supabaseClient = createSupabaseBrowserClient();
+  }
+
+  return supabaseClient;
+};
+
+export const getSupabaseBrowserClient = (): SupabaseClient | null => {
+  if (!hasSupabaseConfig) {
+    return null;
+  }
+
+  return requireSupabaseBrowserClient();
+};
+
+export const supabase = new Proxy({} as SupabaseClient, {
+  get(_target, property) {
+    const client = requireSupabaseBrowserClient();
+    const value = client[property as keyof SupabaseClient];
+    return typeof value === 'function' ? value.bind(client) : value;
+  },
+});
 
 export const getSupabaseConfigErrorMessage = () => SUPABASE_CONFIG_ERROR_MESSAGE;
 
@@ -33,12 +57,16 @@ export const getSupabaseErrorMessage = (error: unknown) => {
     return 'Supabase rejected the request. Check the anon key and your table policies.';
   }
 
+  if (message.includes('placeholder.supabase.co')) {
+    return SUPABASE_CONFIG_ERROR_MESSAGE;
+  }
+
   return message || 'Failed to communicate with Supabase.';
 };
 
 export const getSupabaseRuntimeErrorMessage = (
   error: unknown,
-  fallback = 'Supabase 데이터를 불러오지 못했습니다.'
+  fallback = 'Failed to communicate with Supabase.'
 ) => {
   if (!hasSupabaseConfig) {
     return SUPABASE_CONFIG_ERROR_MESSAGE;
@@ -50,4 +78,60 @@ export const getSupabaseRuntimeErrorMessage = (
   }
 
   return message || fallback;
+};
+
+export const getSupabaseAccessToken = async (): Promise<string | null> => {
+  const client = getSupabaseBrowserClient();
+
+  if (!client) {
+    return null;
+  }
+
+  const {
+    data: { session },
+    error,
+  } = await client.auth.getSession();
+
+  if (error) {
+    throw error;
+  }
+
+  return session?.access_token ?? null;
+};
+
+export const getSupabaseCurrentUser = async (): Promise<User | null> => {
+  const client = getSupabaseBrowserClient();
+
+  if (!client) {
+    return null;
+  }
+
+  const {
+    data: { user },
+    error,
+  } = await client.auth.getUser();
+
+  if (error) {
+    throw error;
+  }
+
+  return user ?? null;
+};
+
+export const getSupabaseStoragePublicUrl = (
+  bucket: string,
+  path?: string | null
+): string => {
+  const normalizedPath = path?.trim().replace(/^\/+/, '') ?? '';
+
+  if (!normalizedPath) {
+    return '';
+  }
+
+  const client = getSupabaseBrowserClient();
+  if (!client) {
+    return '';
+  }
+
+  return client.storage.from(bucket).getPublicUrl(normalizedPath).data.publicUrl;
 };

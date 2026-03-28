@@ -1,9 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   getSupabaseRuntimeErrorMessage,
+  getSupabaseStoragePublicUrl,
   hasSupabaseConfig,
   supabase,
 } from '../../api/supabaseClient';
+import { buildPublicAssetUrl } from '../../config/clientEnv';
 
 type SearchType = 'food' | 'news' | 'recruitment';
 
@@ -20,23 +22,22 @@ export interface SearchBarProps {
 }
 
 const DEFAULT_PLACEHOLDERS: Record<SearchType, string> = {
-  food: '상품명 또는 영양 정보 검색',
-  news: '뉴스 제목 또는 날짜로 검색',
-  recruitment: '채용 정보 검색',
+  food: 'Search products or nutrition facts',
+  news: 'Search news by title or date',
+  recruitment: 'Search recruitment notices',
 };
+
+const FOOD_IMAGE_FALLBACK_URL = buildPublicAssetUrl('thumbnail.png');
 
 const getFoodImageUrl = (imageUrl: string) => {
   if (!imageUrl) {
     return '';
   }
 
-  if (!hasSupabaseConfig && !imageUrl.startsWith('http')) {
-    return '';
-  }
-
   return imageUrl.startsWith('http')
     ? imageUrl
-    : supabase.storage.from('food-images').getPublicUrl(imageUrl).data.publicUrl;
+    : getSupabaseStoragePublicUrl('food-images', imageUrl) ||
+        FOOD_IMAGE_FALLBACK_URL;
 };
 
 export const SearchBar: React.FC<SearchBarProps> = ({
@@ -58,7 +59,10 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+      if (
+        searchRef.current &&
+        !searchRef.current.contains(event.target as Node)
+      ) {
         setShowDropdown(false);
       }
     };
@@ -89,7 +93,10 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           const filteredItems = localItems.filter((item) =>
             searchKeys.some((key) => {
               const value = item?.[key];
-              return typeof value === 'string' && value.toLowerCase().includes(normalizedQuery);
+              return (
+                typeof value === 'string' &&
+                value.toLowerCase().includes(normalizedQuery)
+              );
             })
           );
 
@@ -119,7 +126,10 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 
         setResults([]);
       } catch (error) {
-        console.error('[SearchBar] search failed:', getSupabaseRuntimeErrorMessage(error));
+        console.error(
+          '[SearchBar] search failed:',
+          getSupabaseRuntimeErrorMessage(error)
+        );
         setResults([]);
       } finally {
         setLoading(false);
@@ -163,14 +173,22 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         <div className="flex items-center gap-4">
           {imageUrl ? (
             <div className="w-12 h-12 rounded-lg bg-slate-100 dark:bg-slate-900 overflow-hidden flex-shrink-0">
-              <img src={imageUrl} alt={item.name} className="w-full h-full object-cover" />
+              <img
+                src={imageUrl}
+                alt={item.name}
+                className="w-full h-full object-cover"
+              />
             </div>
           ) : null}
           <div>
-            <div className="text-sm font-bold text-on-surface dark:text-white mb-1">{item.name}</div>
+            <div className="text-sm font-bold text-on-surface dark:text-white mb-1">
+              {item.name}
+            </div>
             <div className="flex items-center gap-2">
               <span className="text-xs font-extrabold text-primary dark:text-blue-400">
-                {typeof item.price === 'number' ? `${item.price.toLocaleString()}원` : ''}
+                {typeof item.price === 'number'
+                  ? `${item.price.toLocaleString()} KRW`
+                  : ''}
               </span>
               <span className="text-[10px] text-on-surface-variant dark:text-slate-400 bg-surface-container-low dark:bg-slate-700 px-1.5 py-0.5 rounded">
                 {item.calories} kcal
@@ -184,19 +202,30 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     if (searchType === 'news') {
       return (
         <div>
-          <div className="text-sm font-bold text-on-surface dark:text-white line-clamp-2">{item.title}</div>
-          <div className="mt-1 text-xs text-on-surface-variant dark:text-slate-400">{item.pubDate}</div>
+          <div className="text-sm font-bold text-on-surface dark:text-white line-clamp-2">
+            {item.title}
+          </div>
+          <div className="mt-1 text-xs text-on-surface-variant dark:text-slate-400">
+            {item.pubDate}
+          </div>
         </div>
       );
     }
 
-    return <div className="text-sm font-bold text-on-surface dark:text-white">{resolveItemLabel(item)}</div>;
+    return (
+      <div className="text-sm font-bold text-on-surface dark:text-white">
+        {resolveItemLabel(item)}
+      </div>
+    );
   };
 
   return (
     <div ref={searchRef} className="relative group w-full">
       <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 sm:pl-5">
-        <span className="material-symbols-outlined text-outline-variant group-focus-within:text-primary transition-colors" translate="no">
+        <span
+          className="material-symbols-outlined text-outline-variant group-focus-within:text-primary transition-colors"
+          translate="no"
+        >
           search
         </span>
       </div>
@@ -220,15 +249,19 @@ export const SearchBar: React.FC<SearchBarProps> = ({
             handleSelect(results[0]);
           }
         }}
-        aria-label="검색 실행"
+        aria-label="Run search"
       >
-        <span className="material-symbols-outlined text-[20px]" translate="no">arrow_forward</span>
+        <span className="material-symbols-outlined text-[20px]" translate="no">
+          arrow_forward
+        </span>
       </button>
 
       {showDropdown && query.trim() ? (
         <div className="absolute top-full left-0 right-0 mt-3 bg-white dark:bg-slate-800 rounded-xl shadow-[0_12px_40px_rgba(27,28,28,0.06)] border border-slate-100 dark:border-slate-700 overflow-hidden z-50">
           {loading ? (
-            <div className="p-4 text-center text-sm text-slate-500">검색 중...</div>
+            <div className="p-4 text-center text-sm text-slate-500">
+              Searching...
+            </div>
           ) : results.length > 0 ? (
             <ul>
               {results.map((item, index) => (
@@ -242,7 +275,9 @@ export const SearchBar: React.FC<SearchBarProps> = ({
               ))}
             </ul>
           ) : (
-            <div className="p-4 text-center text-sm text-slate-500">결과가 없습니다.</div>
+            <div className="p-4 text-center text-sm text-slate-500">
+              No results found.
+            </div>
           )}
         </div>
       ) : null}

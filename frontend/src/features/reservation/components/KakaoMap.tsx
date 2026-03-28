@@ -1,5 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { CustomOverlayMap, Map, MapMarker, useKakaoLoader } from 'react-kakao-maps-sdk';
+import {
+  CustomOverlayMap,
+  Map,
+  MapMarker,
+  useKakaoLoader,
+} from 'react-kakao-maps-sdk';
+import { clientEnv } from '../../../config/clientEnv';
 import { TrainingCenter } from '../data/trainingCenters';
 
 interface KakaoMapProps {
@@ -9,9 +15,27 @@ interface KakaoMapProps {
   emptyMessage?: string;
 }
 
-const KAKAO_MAP_KEY = process.env.REACT_APP_KAKAO_MAP_KEY?.trim() || '';
+const KAKAO_MAP_KEY = clientEnv.kakaoMapKey;
 
-export const KakaoMap: React.FC<KakaoMapProps> = ({
+const MapFallback: React.FC<{
+  title: string;
+  description?: string;
+}> = ({ title, description }) => (
+  <div className="relative rounded-xl overflow-hidden bg-surface-container-low dark:bg-slate-800 shadow-sm aspect-[16/9] border border-outline-variant/10 dark:border-slate-700">
+    <div className="flex flex-col items-center justify-center h-full text-on-surface-variant dark:text-slate-400 gap-3 px-6 text-center">
+      <span
+        className="material-symbols-outlined text-6xl opacity-40"
+        translate="no"
+      >
+        map
+      </span>
+      <p className="text-sm font-medium">{title}</p>
+      {description ? <p className="text-xs opacity-60">{description}</p> : null}
+    </div>
+  </div>
+);
+
+const KakaoMapCanvas: React.FC<KakaoMapProps> = ({
   centers,
   focusedCenter,
   onMarkerClick,
@@ -25,7 +49,10 @@ export const KakaoMap: React.FC<KakaoMapProps> = ({
   const [infoCenter, setInfoCenter] = useState<TrainingCenter | null>(null);
 
   const validCenters = useMemo(
-    () => centers.filter((center) => Number.isFinite(center.lat) && Number.isFinite(center.lng)),
+    () =>
+      centers.filter(
+        (center) => Number.isFinite(center.lat) && Number.isFinite(center.lng)
+      ),
     [centers]
   );
 
@@ -87,39 +114,17 @@ export const KakaoMap: React.FC<KakaoMapProps> = ({
     setInfoCenter(focusedCenter);
   }, [focusedCenter]);
 
-  if (!KAKAO_MAP_KEY) {
-    return (
-      <div className="relative rounded-xl overflow-hidden bg-surface-container-low dark:bg-slate-800 shadow-sm aspect-[16/9] border border-outline-variant/10 dark:border-slate-700">
-        <div className="flex flex-col items-center justify-center h-full text-on-surface-variant dark:text-slate-400 gap-3">
-          <span className="material-symbols-outlined text-6xl opacity-40" translate="no">map</span>
-          <p className="text-sm font-medium">카카오맵 API 키가 설정되지 않았습니다</p>
-          <p className="text-xs opacity-60">REACT_APP_KAKAO_MAP_KEY 환경 변수를 설정해주세요</p>
-        </div>
-      </div>
-    );
-  }
-
   if (error) {
     return (
-      <div className="relative rounded-xl overflow-hidden bg-surface-container-low dark:bg-slate-800 shadow-sm aspect-[16/9] border border-outline-variant/10 dark:border-slate-700">
-        <div className="flex flex-col items-center justify-center h-full text-on-surface-variant dark:text-slate-400 gap-3 px-6 text-center">
-          <span className="material-symbols-outlined text-6xl opacity-40" translate="no">map</span>
-          <p className="text-sm font-medium">카카오맵을 불러오지 못했습니다</p>
-          <p className="text-xs opacity-60">도메인 등록, 카카오맵 사용 설정, 네트워크 상태를 확인해주세요</p>
-        </div>
-      </div>
+      <MapFallback
+        title="Could not load the Kakao map."
+        description="Check the Kakao JavaScript key, allowed domains, and current network status."
+      />
     );
   }
 
   if (loading) {
-    return (
-      <div className="relative rounded-xl overflow-hidden bg-surface-container-low dark:bg-slate-800 shadow-sm aspect-[16/9] border border-outline-variant/10 dark:border-slate-700">
-        <div className="flex flex-col items-center justify-center h-full text-on-surface-variant dark:text-slate-400 gap-3">
-          <span className="material-symbols-outlined animate-spin text-4xl" translate="no">progress_activity</span>
-          <p className="text-sm font-medium">지도를 불러오는 중...</p>
-        </div>
-      </div>
-    );
+    return <MapFallback title="Loading the Kakao map..." />;
   }
 
   return (
@@ -141,7 +146,10 @@ export const KakaoMap: React.FC<KakaoMapProps> = ({
                 onMarkerClick?.(center);
               }}
             />
-            <CustomOverlayMap position={{ lat: center.lat, lng: center.lng }} yAnchor={2.8}>
+            <CustomOverlayMap
+              position={{ lat: center.lat, lng: center.lng }}
+              yAnchor={2.8}
+            >
               <div
                 style={{
                   padding: '4px 10px',
@@ -167,7 +175,10 @@ export const KakaoMap: React.FC<KakaoMapProps> = ({
         ))}
 
         {infoCenter && (
-          <CustomOverlayMap position={{ lat: infoCenter.lat, lng: infoCenter.lng }} yAnchor={1.15}>
+          <CustomOverlayMap
+            position={{ lat: infoCenter.lat, lng: infoCenter.lng }}
+            yAnchor={1.15}
+          >
             <div
               style={{
                 background: '#fff',
@@ -207,7 +218,9 @@ export const KakaoMap: React.FC<KakaoMapProps> = ({
               >
                 {infoCenter.name}
               </p>
-              <p style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
+              <p
+                style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}
+              >
                 {infoCenter.address}
               </p>
               {infoCenter.phone && (
@@ -226,4 +239,17 @@ export const KakaoMap: React.FC<KakaoMapProps> = ({
       )}
     </div>
   );
+};
+
+export const KakaoMap: React.FC<KakaoMapProps> = (props) => {
+  if (!KAKAO_MAP_KEY) {
+    return (
+      <MapFallback
+        title="Kakao map is unavailable in this build."
+        description="Set REACT_APP_KAKAO_MAP_KEY before building the frontend."
+      />
+    );
+  }
+
+  return <KakaoMapCanvas {...props} />;
 };

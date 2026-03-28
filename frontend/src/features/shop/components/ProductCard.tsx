@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
+import { getSupabaseStoragePublicUrl } from '../../../api/supabaseClient';
+import { buildPublicAssetUrl } from '../../../config/clientEnv';
 import type { Product } from '../types';
-import { supabase } from '../../../api/supabaseClient';
 import { requestPayment } from '../../cart/services/paymentService';
 import { useCartContext } from '../../cart/context/CartContext';
 
@@ -10,40 +11,37 @@ interface ProductCardProps {
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const [cartLoading, setCartLoading] = useState(false);
-  const [feedback, setFeedback] = useState<{ msg: string; ok: boolean } | null>(null);
-  
-  // ⭐ Context에서 미리 만들어둔 handleAddToCart를 가져옵니다.
-  // 이 함수는 DB 저장 + 목록 새로고침 + 장바구니 열기를 한 번에 해줍니다.
+  const [feedback, setFeedback] = useState<{ msg: string; ok: boolean } | null>(
+    null
+  );
   const { handleAddToCart } = useCartContext();
 
   const buyNow = () => {
     const orderName = product.name;
-    const customerName = '사용자'; 
+    const customerName = 'Customer';
     const successUrl = `${window.location.origin}/payment-success`;
-    
-    // 결제 서비스 호출
+
     requestPayment(product.price, orderName, customerName, successUrl);
   };
 
-  // 이미지 URL 처리
+  const fallbackImageUrl = buildPublicAssetUrl('thumbnail.png');
   const imageUrl = product.image_url.startsWith('http')
     ? product.image_url
-    : supabase.storage.from('food-images').getPublicUrl(product.image_url).data.publicUrl;
+    : getSupabaseStoragePublicUrl('food-images', product.image_url) ||
+      fallbackImageUrl;
 
-  // ⭐ 장바구니 담기 버튼 클릭 핸들러
   const onAddToCartClick = async () => {
     setCartLoading(true);
     setFeedback(null);
     try {
-      // Context의 함수를 호출하여 복잡한 과정을 한 번에 처리합니다.
       await handleAddToCart(product.id);
-      
-      setFeedback({ msg: '✅ 장바구니에 담겼습니다!', ok: true });
+
+      setFeedback({ msg: 'Added to cart.', ok: true });
       setTimeout(() => setFeedback(null), 2000);
     } catch (err: any) {
       const isAuthError = err.message === '로그인이 필요합니다.';
       setFeedback({
-        msg: isAuthError ? '🔒 로그인 후 이용해 주세요.' : '❌ 오류가 발생했습니다.',
+        msg: isAuthError ? 'Please log in first.' : 'Something went wrong.',
         ok: false,
       });
       setTimeout(() => setFeedback(null), 2500);
@@ -62,30 +60,42 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         />
       </div>
       <div className="p-5">
-        <h3 className="text-lg font-bold text-on-surface mb-2 tracking-tight">{product.name}</h3>
-        <p className="text-on-surface-variant text-sm mb-4 line-clamp-2">칼로리: {product.calories} kcal</p>
+        <h3 className="text-lg font-bold text-on-surface mb-2 tracking-tight">
+          {product.name}
+        </h3>
+        <p className="text-on-surface-variant text-sm mb-4 line-clamp-2">
+          Calories {product.calories} kcal
+        </p>
 
         {feedback && (
-          <p className={`text-xs mb-2 text-center font-medium ${feedback.ok ? 'text-green-600' : 'text-red-500'}`}>
+          <p
+            className={`text-xs mb-2 text-center font-medium ${
+              feedback.ok ? 'text-green-600' : 'text-red-500'
+            }`}
+          >
             {feedback.msg}
           </p>
         )}
 
         <div className="flex items-center justify-between">
-          <span className="text-lg font-extrabold text-primary">₩ {product.price.toLocaleString()}</span>
+          <span className="text-lg font-extrabold text-primary">
+            {`${product.price.toLocaleString()} KRW`}
+          </span>
           <div className="flex gap-2">
             <button
               onClick={buyNow}
               className="w-10 h-10 flex items-center justify-center rounded-full bg-surface-container-low text-on-surface hover:bg-primary hover:text-on-primary transition-all"
-              aria-label="바로 구매"
+              aria-label="Buy now"
             >
-              <span className="material-symbols-outlined text-[20px]" translate="no">credit_card</span>
+              <span className="material-symbols-outlined text-[20px]" translate="no">
+                credit_card
+              </span>
             </button>
             <button
               onClick={onAddToCartClick}
               disabled={cartLoading}
               className="w-10 h-10 flex items-center justify-center rounded-full bg-surface-container-low text-on-surface hover:bg-primary hover:text-on-primary transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              aria-label="장바구니에 담기"
+              aria-label="Add to cart"
             >
               <span className="material-symbols-outlined text-[20px]" translate="no">
                 {cartLoading ? 'hourglass_empty' : 'shopping_cart'}

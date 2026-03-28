@@ -1,3 +1,5 @@
+import { clientEnv } from '../../config/clientEnv';
+
 export type RecruitmentStatus =
   | '모집 예정'
   | '접수 중'
@@ -47,10 +49,7 @@ const API_ENDPOINT = 'https://apis.data.go.kr/1300000/MJBGJWJeopSuHH4/list';
 const REQUEST_STEPS = [5, 10, 15, 20, 25, 30];
 const DATE_OFFSET_YEARS = 3;
 
-const rawDataServiceKey =
-  process.env.REACT_APP_DATA_SERVICE_KEY ||
-  process.env.REACT_DATA_SERVICE_KEY ||
-  '';
+const rawDataServiceKey = clientEnv.recruitmentServiceKey;
 
 export const hasRecruitmentServiceKey = Boolean(rawDataServiceKey);
 
@@ -315,7 +314,7 @@ const dedupeRecruitmentNotices = (items: RecruitmentNotice[]) => {
 export const fetchRecruitmentNotices = async (signal?: AbortSignal) => {
   if (!rawDataServiceKey) {
     throw new Error(
-      'REACT_APP_DATA_SERVICE_KEY 환경변수가 없습니다. react-scripts에서는 REACT_APP_ 접두사가 필요합니다.'
+      'REACT_APP_DATA_SERVICE_KEY is not configured. react-scripts only exposes variables prefixed with REACT_APP_.'
     );
   }
 

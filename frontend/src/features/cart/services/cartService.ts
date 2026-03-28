@@ -1,10 +1,22 @@
-import { supabase } from '../../../api/supabaseClient';
+import {
+  getSupabaseConfigErrorMessage,
+  hasSupabaseConfig,
+  supabase,
+} from '../../../api/supabaseClient';
 import type { AddToCartPayload, CartItemWithFood, Coupon } from '../types/cart.types';
+
+const ensureSupabaseCartConfig = () => {
+  if (!hasSupabaseConfig) {
+    throw new Error(getSupabaseConfigErrorMessage());
+  }
+};
 
 /**
  * 장바구니에 음식을 추가합니다. (Upsert 방식)
  */
 export async function addToCart(payload: AddToCartPayload): Promise<void> {
+  ensureSupabaseCartConfig();
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -46,6 +58,10 @@ export async function addToCart(payload: AddToCartPayload): Promise<void> {
  * [수정 포인트]: user_id 필터를 명시하고, 최신순 정렬을 보장합니다.
  */
 export async function getCartItems(): Promise<CartItemWithFood[]> {
+  if (!hasSupabaseConfig) {
+    return [];
+  }
+
   const { data: { user } } = await supabase.auth.getUser();
   
   if (!user) return []; // 로그인 안 되어 있으면 빈 배열 반환
@@ -77,6 +93,10 @@ export async function getCartItems(): Promise<CartItemWithFood[]> {
  * 특정 아이템 삭제
  */
 export async function removeFromCart(cartItemId: string): Promise<void> {
+  ensureSupabaseCartConfig();
+
+  ensureSupabaseCartConfig();
+
   const { error } = await supabase
     .from('cart_items')
     .delete()
@@ -89,6 +109,8 @@ export async function removeFromCart(cartItemId: string): Promise<void> {
  * 장바구니 전체 비우기
  */
 export async function clearCart(): Promise<void> {
+  ensureSupabaseCartConfig();
+
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('로그인이 필요합니다.');
 
@@ -104,6 +126,10 @@ export async function clearCart(): Promise<void> {
  * 로그인 유저의 사용 가능한 쿠폰 목록을 조회합니다.
  */
 export async function getAvailableCouponsForUser(): Promise<Coupon[]> {
+  if (!hasSupabaseConfig) {
+    return [];
+  }
+
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return [];
 
@@ -138,6 +164,10 @@ export async function getAvailableCouponsForUser(): Promise<Coupon[]> {
  * 로그인 유저의 모든 쿠폰 목록을 조회합니다. (사용한 쿠폰 포함)
  */
 export async function getUserCouponsForUser(): Promise<Coupon[]> {
+  if (!hasSupabaseConfig) {
+    return [];
+  }
+
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return [];
 

@@ -5,12 +5,13 @@ import { User } from '@supabase/supabase-js';
 import { CartIcon } from '../../features/cart/components/CartIcon';
 import { useCart } from '../../features/cart/hooks/useCart';
 import { Profile } from '../../features/profile/types';
+import { buildPublicAssetUrl } from '../../config/clientEnv';
 import { getCadreCategoryLabel, getProfileDisplayRank, isCadreUser } from '../../utils/serviceDates';
 import { LoginModal } from '../common/LoginModal';
 import { MyCouponModal } from '../common/MyCouponModal';
 import { ProfileAvatar } from '../common/ProfileAvatar';
 
-const brandLogoSrc = `${process.env.PUBLIC_URL}/logo.png`;
+const brandLogoSrc = buildPublicAssetUrl('logo.png');
 
 interface HeaderProps {
   user: User | null;

@@ -1,4 +1,4 @@
-import { supabase } from '../api/supabaseClient';
+import { getSupabaseStoragePublicUrl } from '../api/supabaseClient';
 import { getDisplayRank } from './serviceDates';
 
 export interface AvatarProfileLike {
@@ -67,7 +67,7 @@ export const getProfileAvatarPath = (profile?: AvatarProfileLike | null): string
 };
 
 export const getStorageAvatarUrl = (path: string): string =>
-  supabase.storage.from(PROFILE_IMAGE_BUCKET).getPublicUrl(path).data.publicUrl;
+  getSupabaseStoragePublicUrl(PROFILE_IMAGE_BUCKET, path);
 
 export const getDefaultProfileAvatarUrl = (): string =>
   getStorageAvatarUrl(DEFAULT_PROFILE_AVATAR_PATH);

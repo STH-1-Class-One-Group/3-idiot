@@ -1,4 +1,7 @@
-import { hasSupabaseConfig, supabase } from '../../api/supabaseClient';
+import {
+  getSupabaseAccessToken,
+  hasSupabaseConfig,
+} from '../../api/supabaseClient';
 import { buildApiUrl } from '../../api/apiBaseUrl';
 
 export interface NewsItemPayload {
@@ -20,12 +23,8 @@ const getAuthenticatedNewsRequestHeaders = async (): Promise<HeadersInit> => {
     return {};
   }
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
   const headers: Record<string, string> = {};
-  const token = session?.access_token;
+  const token = await getSupabaseAccessToken();
   if (token) {
     headers.Authorization = `Bearer ${token}`;
   }
