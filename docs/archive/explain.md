@@ -334,3 +334,25 @@ installHook.js:1 TypeError: Failed to fetch
 
 
 25. 다른 기능들은 다 제대로 동작해, 그런데 이제 로컬 환경에서 말고도 배포 환경에서도 로그인 시 리다이렉트가 제대로 동작이 되었으면 좋겠어 배포된 url로 접속해서 로그인을 하면 배포 페이지가 아닌 로컬 페이지로 리다이렉트가 되는 현상이 있거든, 그 부분 일단 수정이 되었으면 좋겠어 참고로 배포 URL은 https://teamc-defense-industry.pages.dev 경로야 그리고 전체적인 웹페이지 favicon 이미지는 frontend/public/favicon-final.png에 있는 이미지로 변경되었으면 좋겠어
+
+
+
+25-1. 예비군 페이지에서 비로그인 기준, 카카오 맵 연동하려고 하면 이런 오류가 발생해(로그인하면 정상적으로 맵 불러와짐, 로컬 환경에서는 로그인하지 않아도 잘 불러와짐) 이 부분 좀 해결해주었으면 좋겠어
+
+installHook.js:1 [KakaoMap] Kakao map loader failed 
+{reason: 'domain_not_allowed_or_network_blocked', keyPresent: true, origin: 'https://teamc-defense-industry.pages.dev', pathname: '/ArmedReserve', errorType: 'error'}
+errorType
+: 
+"error"
+keyPresent
+: 
+true
+origin
+: 
+"https://teamc-defense-industry.pages.dev"
+pathname
+: 
+"/ArmedReserve"
+reason
+: 
+"domain_not_allowed_or_network_blocked"
