@@ -2,6 +2,12 @@ import React, { useEffect } from 'react';
 import { Map, MapMarker, useKakaoLoader } from 'react-kakao-maps-sdk';
 import { clientEnv } from '../../../config/clientEnv';
 import { TrainingCenter } from '../data/trainingCenters';
+import {
+  classifyKakaoMapFailure,
+  getKakaoMapModalMessage,
+  getKakaoMapSupportHint,
+  reportKakaoMapFailure,
+} from './kakaoMapDiagnostics';
 
 interface TrainingCenterModalProps {
   center: TrainingCenter;
@@ -10,7 +16,10 @@ interface TrainingCenterModalProps {
 
 const KAKAO_MAP_KEY = clientEnv.kakaoMapKey;
 
-const ModalMapFallback: React.FC<{ message: string }> = ({ message }) => (
+const ModalMapFallback: React.FC<{
+  message: string;
+  supportHint?: string;
+}> = ({ message, supportHint }) => (
   <div className="rounded-xl bg-surface-container-low dark:bg-slate-800 aspect-[16/9] flex items-center justify-center border border-outline-variant/10 dark:border-slate-700">
     <div className="text-center text-on-surface-variant dark:text-slate-400 px-6">
       <span
@@ -20,6 +29,9 @@ const ModalMapFallback: React.FC<{ message: string }> = ({ message }) => (
         map
       </span>
       <p className="text-sm">{message}</p>
+      {supportHint ? (
+        <p className="text-[11px] opacity-50 mt-2">{supportHint}</p>
+      ) : null}
     </div>
   </div>
 );
@@ -31,6 +43,16 @@ const TrainingCenterMap: React.FC<{
   const [loading, error] = useKakaoLoader({
     appkey: KAKAO_MAP_KEY,
   });
+  const failureReason = classifyKakaoMapFailure(KAKAO_MAP_KEY, error);
+  const supportHint = getKakaoMapSupportHint(failureReason);
+
+  useEffect(() => {
+    if (!error) {
+      return;
+    }
+
+    reportKakaoMapFailure('TrainingCenterModal', KAKAO_MAP_KEY, error);
+  }, [error]);
 
   if (!hasCoords) {
     return (
@@ -39,7 +61,12 @@ const TrainingCenterMap: React.FC<{
   }
 
   if (error) {
-    return <ModalMapFallback message="Could not load the Kakao map." />;
+    return (
+      <ModalMapFallback
+        message={getKakaoMapModalMessage(failureReason)}
+        supportHint={supportHint}
+      />
+    );
   }
 
   if (loading) {
@@ -130,7 +157,10 @@ export const TrainingCenterModal: React.FC<TrainingCenterModalProps> = ({
           {KAKAO_MAP_KEY ? (
             <TrainingCenterMap center={center} hasCoords={hasCoords} />
           ) : (
-            <ModalMapFallback message="Kakao map is unavailable in this build." />
+            <ModalMapFallback
+              message={getKakaoMapModalMessage('missing_key')}
+              supportHint={getKakaoMapSupportHint('missing_key')}
+            />
           )}
         </div>
 

@@ -7,6 +7,12 @@ import {
 } from 'react-kakao-maps-sdk';
 import { clientEnv } from '../../../config/clientEnv';
 import { TrainingCenter } from '../data/trainingCenters';
+import {
+  classifyKakaoMapFailure,
+  getKakaoMapFallbackCopy,
+  getKakaoMapSupportHint,
+  reportKakaoMapFailure,
+} from './kakaoMapDiagnostics';
 
 interface KakaoMapProps {
   centers: TrainingCenter[];
@@ -20,7 +26,8 @@ const KAKAO_MAP_KEY = clientEnv.kakaoMapKey;
 const MapFallback: React.FC<{
   title: string;
   description?: string;
-}> = ({ title, description }) => (
+  supportHint?: string;
+}> = ({ title, description, supportHint }) => (
   <div className="relative rounded-xl overflow-hidden bg-surface-container-low dark:bg-slate-800 shadow-sm aspect-[16/9] border border-outline-variant/10 dark:border-slate-700">
     <div className="flex flex-col items-center justify-center h-full text-on-surface-variant dark:text-slate-400 gap-3 px-6 text-center">
       <span
@@ -31,6 +38,9 @@ const MapFallback: React.FC<{
       </span>
       <p className="text-sm font-medium">{title}</p>
       {description ? <p className="text-xs opacity-60">{description}</p> : null}
+      {supportHint ? (
+        <p className="text-[11px] opacity-50">{supportHint}</p>
+      ) : null}
     </div>
   </div>
 );
@@ -114,11 +124,24 @@ const KakaoMapCanvas: React.FC<KakaoMapProps> = ({
     setInfoCenter(focusedCenter);
   }, [focusedCenter]);
 
+  const failureReason = classifyKakaoMapFailure(KAKAO_MAP_KEY, error);
+  const fallbackCopy = getKakaoMapFallbackCopy(failureReason);
+  const supportHint = getKakaoMapSupportHint(failureReason);
+
+  useEffect(() => {
+    if (!error) {
+      return;
+    }
+
+    reportKakaoMapFailure('KakaoMap', KAKAO_MAP_KEY, error);
+  }, [error]);
+
   if (error) {
     return (
       <MapFallback
-        title="Could not load the Kakao map."
-        description="Check the Kakao JavaScript key, allowed domains, and current network status."
+        title={fallbackCopy.title}
+        description={fallbackCopy.description}
+        supportHint={supportHint}
       />
     );
   }
@@ -243,10 +266,14 @@ const KakaoMapCanvas: React.FC<KakaoMapProps> = ({
 
 export const KakaoMap: React.FC<KakaoMapProps> = (props) => {
   if (!KAKAO_MAP_KEY) {
+    const fallbackCopy = getKakaoMapFallbackCopy('missing_key');
+    const supportHint = getKakaoMapSupportHint('missing_key');
+
     return (
       <MapFallback
-        title="Kakao map is unavailable in this build."
-        description="Set REACT_APP_KAKAO_MAP_KEY before building the frontend."
+        title={fallbackCopy.title}
+        description={fallbackCopy.description}
+        supportHint={supportHint}
       />
     );
   }
