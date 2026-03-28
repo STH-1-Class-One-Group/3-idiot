@@ -1,12 +1,12 @@
 {
   "short_name": "Modern Sentinel",
-  "name": "Modern Sentinel — 군인을 위한 스마트 플랫폼",
-  "description": "예비군 훈련장 찾기, 급식 정보, 방산 뉴스, 커뮤니티까지. 군인의 일상을 한곳에서 관리하세요.",
+  "name": "Modern Sentinel",
+  "description": "Reserve centers, meals, defense news, and community tools.",
   "icons": [
     {
-      "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
+      "src": "favicon-final.png",
+      "sizes": "16x16",
+      "type": "image/png"
     },
     {
       "src": "logo192.png",
