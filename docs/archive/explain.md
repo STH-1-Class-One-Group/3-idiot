@@ -246,3 +246,88 @@ installHook.js:1 [DashboardPage] news fetch failed: TypeError: Failed to fetch
 
 23-2. 다른 데이터들은 정상적으로 잘 받아오는데(모병 모집의 경우, 가끔은 안불러와지기도 해) 로그인 시도를 하자 마자, 모든 환경 변수의 값들이 제대로 가져와지지 않는 문제가 발생했어 상품 로드 오류: Supabase 브라우저 설정이 없습니다. REACT_APP_SUPABASE_URL과 REACT_APP_SUPABASE_ANON_KEY를 설정해 주세요.(군대 음식) API 서버에 연결할 수 없어 식단 데이터를 불러오지 못했습니다. 백엔드 서버(http://localhost:8000)가 실행 중인지 확인해 주세요.(군대 식단) API 서버에 연결할 수 없어 뉴스를 불러오지 못했습니다. 백엔드 서버(http://localhost:8000)가 실행 중인지 확인해 주세요.(군대 뉴스) 모병 모집 API 키가 없습니다. frontend 환경변수에 REACT_APP_DATA_SERVICE_KEY를 설정해 주세요.(모병 모집) Failed to fetch(커뮤니티)
 
+
+
+
+
+24. 지금 배포한 후에 상황을 살펴보니 좀 많이 이상한 상황이야, 우선 배포된 후에(클라이언트, 서버 모두) 클라이언트 접속하면 다른 기능들은 다 정상적으로 동작을 하는데 예비군 페이지의 지도 부분이 제대로 연동이 안되는 상황이고, 로그인을 하면 이전과 같이 다른 환경변수들을 제대로 불러오지 못하는 상황인데 지도 부분이 제대로 연동이 돼 그리고 파비콘 같은 경우에도 로그인 전/후가 각각 다른 현상도 발견되었어, 로그인 전에 발생한 카카오 맵 관련 오류는 Failed to load Kakao Maps script, retrying in 2 ms. , apis.data.go.kr/1300000/MJBGJWJeopSuHH4/list?serviceKey=9fcb626589083af10758cc519f835d35dda55aa2819efa2b21d7b2f45452f97f&pageNo=1&numOfRows=15:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)이렇게 카카오 맵을 연동하지 못하는 부분이 있고, 로그인 후에 발생하는 오류는 placeholder.supabase.co/auth/v1/user:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED이 오류 이해하기
+installHook.js:1 TypeError: Failed to fetch
+    at helpers.ts:109:1
+    at _handleRequest (fetch.ts:184:1)
+    at _request (fetch.ts:157:1)
+    at SupabaseAuthClient._getUser (GoTrueClient.ts:2936:1)
+    at SupabaseAuthClient._getSessionFromURL (GoTrueClient.ts:3628:1)
+    at SupabaseAuthClient._initialize (GoTrueClient.ts:502:1)
+(군대 음식 불러오지 못하는 오류, 환경변수가 로그인 후에 불러오지 못하는 문제로 추정)
+DashboardPage.tsx:255 
+ GET http://localhost:8000/api/v1/meals/2026-03-28 net::ERR_CONNECTION_REFUSED
+installHook.js:1 [DashboardPage] meal fetch failed, using fallback: TypeError: Failed to fetch
+    at fetchMeals (DashboardPage.tsx:255:1)
+    at DashboardPage.tsx:312:1
+newsApi.ts:47 
+ GET http://localhost:8000/api/v1/news?limit=4&start=1&force_refresh=false net::ERR_CONNECTION_REFUSED
+installHook.js:1 [DashboardPage] news fetch failed: TypeError: Failed to fetch
+    at fetchNewsBatch (newsApi.ts:47:1)
+    at fetchNews (DashboardPage.tsx:285:1)
+    at DashboardPage.tsx:313:1
+API 서버에 연결할 수 없어 식단 데이터를 불러오지 못했습니다. 백엔드 서버(http://localhost:8000)가 실행 중인지 확인해 주세요.
+API 서버에 연결할 수 없어 뉴스를 불러오지 못했습니다. 백엔드 서버(http://localhost:8000)가 실행 중인지 확인해 주세요.
+(오늘의 식단과 군대 뉴스를 불러오지 못하는 오류, 환경변수가 로그인 후에 불러오지 못하는 문제로 추정)
+모병 모집 API 키가 없습니다. frontend 환경변수에 REACT_APP_DATA_SERVICE_KEY를 설정해 주세요.
+(모병 모집을 불러오지 못하는 오류, 환경변수가 로그인 후에 불러오지 못하는 문제로 추정)
+CommunityPage.tsx:95  GET http://localhost:8000/api/v1/community/posts?page=1&per_page=30 net::ERR_CONNECTION_REFUSED
+(익명) @ CommunityPage.tsx:95
+(익명) @ CommunityPage.tsx:150
+react_stack_bottom_frame @ react-dom-client.development.js:25989
+runWithFiberInDEV @ react-dom-client.development.js:870
+commitHookEffectListMount @ react-dom-client.development.js:13244
+commitHookPassiveMountEffects @ react-dom-client.development.js:13334
+reconnectPassiveEffects @ react-dom-client.development.js:15832
+doubleInvokeEffectsOnFiber @ react-dom-client.development.js:18700
+runWithFiberInDEV @ react-dom-client.development.js:870
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom-client.development.js:18664
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom-client.development.js:18664
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom-client.development.js:18664
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom-client.development.js:18664
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom-client.development.js:18664
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom-client.development.js:18664
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom-client.development.js:18664
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom-client.development.js:18664
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom-client.development.js:18664
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom-client.development.js:18664
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom-client.development.js:18664
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom-client.development.js:18664
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom-client.development.js:18664
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom-client.development.js:18664
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom-client.development.js:18664
+commitDoubleInvokeEffectsInDEV @ react-dom-client.development.js:18712
+flushPassiveEffects @ react-dom-client.development.js:18439
+(익명) @ react-dom-client.development.js:17923
+performWorkUntilDeadline @ scheduler.development.js:45
+<CommunityPage>
+(익명) @ react-jsx-dev-runtime.development.js:327
+App @ App.tsx:249
+react_stack_bottom_frame @ react-dom-client.development.js:25904
+renderWithHooksAgain @ react-dom-client.development.js:7762
+renderWithHooks @ react-dom-client.development.js:7674
+updateFunctionComponent @ react-dom-client.development.js:10166
+beginWork @ react-dom-client.development.js:11778
+runWithFiberInDEV @ react-dom-client.development.js:870
+performUnitOfWork @ react-dom-client.development.js:17639
+workLoopSync @ react-dom-client.development.js:17469
+renderRootSync @ react-dom-client.development.js:17450
+performWorkOnRoot @ react-dom-client.development.js:16498
+performWorkOnRootViaSchedulerTask @ react-dom-client.development.js:18957
+performWorkUntilDeadline @ scheduler.development.js:45
+<App>
+(익명) @ react-jsx-dev-runtime.development.js:327
+./src/index.tsx @ index.tsx:14
+(익명) @ react refresh:37
+__webpack_require__ @ bootstrap:28
+(익명) @ startup:7
+(익명) @ startup:7이 오류 이해하기
+installHook.js:1 TypeError: Failed to fetch
+    at CommunityPage.tsx:95:1
+    at CommunityPage.tsx:150:1
+(커뮤니티 게시글을 불러오지 못하는 오류, 환경변수가 로그인 후에 불러오지 못하는 문제로 추정)
+일단 GEMINI.md파일을 참고해보는 것도 좋을 거야
