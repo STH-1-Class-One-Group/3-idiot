@@ -7,6 +7,10 @@ import {
   hasSupabaseConfig,
   supabase,
 } from '../../api/supabaseClient';
+import {
+  getOAuthRedirectTo,
+  persistPostLoginPath,
+} from '../../features/auth/authRedirect';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -20,15 +24,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
     return null;
   }
 
-  const getRedirectTo = () => {
-    if (typeof window === 'undefined') {
-      return undefined;
-    }
-
-    const { origin, pathname, search } = window.location;
-    return `${origin}${pathname}${search}`;
-  };
-
   const handleLogin = async (provider: OAuthProvider) => {
     if (!hasSupabaseConfig) {
       alert(getSupabaseConfigErrorMessage());
@@ -36,10 +31,12 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
     }
 
     try {
+      persistPostLoginPath();
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider: provider as Parameters<typeof supabase.auth.signInWithOAuth>[0]['provider'],
         options: {
-          redirectTo: getRedirectTo(),
+          redirectTo: getOAuthRedirectTo(),
           ...(provider === 'google'
             ? {
                 queryParams: {

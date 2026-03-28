@@ -7,6 +7,7 @@ import { Footer } from './components/layout/Footer';
 import { Header } from './components/layout/Header';
 import { ProfileSetupModal } from './components/common/ProfileSetupModal';
 import { SignupCompletionModal } from './components/common/SignupCompletionModal';
+import { AuthRedirectHandler } from './features/auth/AuthRedirectHandler';
 import { CartModal } from './features/cart/components/CartModal';
 import PaymentSuccess from './features/cart/components/PaymentSuccess';
 import { CartProvider } from './features/cart/context/CartContext';
@@ -224,6 +225,7 @@ const App: React.FC = () => {
   return (
     <CartProvider>
       <BrowserRouter>
+        <AuthRedirectHandler user={user} />
         <div className="min-h-screen flex flex-col bg-surface dark:bg-slate-950 transition-colors">
           <Header user={user} profile={profile ?? null} onSignOut={handleSignOut} />
           <main className="mx-auto w-full max-w-7xl flex-grow px-4 pb-14 pt-24 sm:px-6 sm:pb-16 sm:pt-28 lg:px-8 lg:pb-20 lg:pt-32">
